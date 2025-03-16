@@ -1,0 +1,194 @@
+const pgsdb = require('../library/pgsdb');
+const db = new pgsdb();
+
+const createTicket = async (data) => {
+    const ticketTable = `service.ticket`;
+    let results = await db.insert(ticketTable, data);
+    return results;
+}
+
+const getTicket = async (id) => {
+    const query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date,TO_CHAR(t.plan_in_time, 'DD-MON-YYYY HH:MI') AS plan_in_date, u.username as contact_person_name FROM service.ticket AS t
+ INNER JOIN public.users AS u ON t.contact_person = u.userid
+ Where t.sr_id = ${id}`;
+    const result = await db.raw(query);
+    return result[0];
+}
+
+const getAllTickets = async () => {
+
+    const query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name,a.username as assigned_to_name FROM service.ticket AS t
+ INNER JOIN public.users AS u ON t.contact_person = u.userid
+ LEFT JOIN public.users AS a ON t.assigned_to = a.userid ORDER BY reported_date DESC`;
+    const results = await db.raw(query);
+    return results;
+}
+
+
+
+const getCustomerTickets = async (id) => {
+    const query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as assigned_to_name FROM service.ticket AS t
+ LEFT JOIN public.users AS u 
+ ON t.assigned_to = u.userid 
+ WHERE  t.contact_person = ${id}  ORDER BY reported_date DESC`;
+    const results = await db.raw(query);
+    return results;
+}
+
+const getAssignTickets = async () => {
+    const query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name,a.username as assigned_to_name FROM service.ticket AS t
+ LEFT JOIN public.users AS u ON t.contact_person = u.userid 
+ LEFT JOIN public.users AS a ON t.assigned_to = a.userid
+ WHERE  t.assigned_to IS NULL OR sr_status IN ('P','X')    ORDER BY reported_date DESC`;
+    const results = await db.raw(query);
+    return results;
+}
+
+const getAssignedTickets = async (id,role) => {
+    let query;
+    if(role == "Admin"){
+        query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date ,TO_CHAR(t.plan_in_time, 'DD-MON-YYYY HH:MM') AS plan_in_date, u.username as contact_person_name FROM service.ticket AS t
+ LEFT JOIN public.users AS u 
+ ON t.contact_person = u.userid 
+ ORDER BY reported_date DESC`;
+    }else if(role == "Manager"){
+        // console.log(id,role);
+        query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name FROM service.ticket AS t
+    LEFT JOIN public.users AS u 
+    ON t.contact_person = u.userid 
+    WHERE  t.assigned_by = ${id}  ORDER BY reported_date DESC`;
+       }else{
+     query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name FROM service.ticket AS t
+ LEFT JOIN public.users AS u 
+ ON t.contact_person = u.userid 
+ WHERE  t.assigned_to = ${id}  ORDER BY reported_date DESC`;}
+//  else{
+//      query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name FROM service.ticket AS t
+//  LEFT JOIN public.users AS u 
+//  ON t.contact_person = u.userid 
+//  WHERE  t.assigned_to = ${id}  ORDER BY reported_date DESC`;
+//     }
+    const results = await db.raw(query);
+    return results;
+}
+
+const getCloseTickets = async (id,role) => {
+    let query;
+    // console.log(id,role);
+    if(role == "Admin"){
+        query = `SELECT 
+    t.*,
+    TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date,
+    TO_CHAR(t.act_in_time, 'DD-MON-YYYY HH:MI') AS actf_in_time,
+    TO_CHAR(t.act_out_time, 'DD-MON-YYYY HH:MI') AS actf_out_time,
+    TO_CHAR(t.customer_in_time, 'DD-MON-YYYY HH:MI') AS customerf_in_time,
+    TO_CHAR(t.customer_out_time, 'DD-MON-YYYY HH:MI') AS customerf_out_time,
+    a.username AS assigned_to_name,
+	u.username AS contact_person_name,
+	c.company_name,
+    COALESCE(
+        JSON_AGG(
+            JSON_BUILD_OBJECT(
+                'solution_id', s.solution_id,
+                'problem', s.problem,
+                'actions', s.actions,
+                'status', s.service_status,
+                'completion_date', TO_CHAR(s.status_date, 'DD-MON-YYYY'),
+                'status_remark', s.status_remark,
+                'customer_remark', s.customer_feedback
+            )
+        ) FILTER (WHERE s.solution_id IS NOT NULL), 
+        '[]' -- If no solutions exist, return an empty array
+    ) AS solutions
+FROM service.ticket AS t
+LEFT JOIN public.users AS a ON t.assigned_to = a.userid
+LEFT JOIN public.users AS u ON t.contact_person = u.userid
+LEFT JOIN public.company AS c ON t.company_id = c.company_id
+LEFT JOIN service.solution AS s ON t.sr_id = s.sr_id
+Where t.sr_status IN ('Z')
+GROUP BY t.sr_id, a.username,u.username,c.company_name`;
+    }else if(role == "Manager"){
+        // console.log(id,role);
+        query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name FROM service.ticket AS t
+    LEFT JOIN public.users AS u 
+    ON t.contact_person = u.userid 
+    WHERE  t.assigned_by = ${id}  ORDER BY reported_date DESC`;
+       }else{
+     query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name FROM service.ticket AS t
+ LEFT JOIN public.users AS u 
+ ON t.contact_person = u.userid 
+ WHERE  t.assigned_to = ${id}  ORDER BY reported_date DESC`;
+    }
+    const results = await db.raw(query);
+    return results;
+}
+
+const getTicketsReport = async (data) => {
+    let query;
+    // console.log(id,role);
+        query = `SELECT 
+    t.*,
+    TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date,
+    TO_CHAR(t.act_in_time, 'DD-MON-YYYY HH:MI') AS actf_in_time,
+    TO_CHAR(t.act_out_time, 'DD-MON-YYYY HH:MI') AS actf_out_time,
+    TO_CHAR(t.customer_in_time, 'DD-MON-YYYY HH:MI') AS customerf_in_time,
+    TO_CHAR(t.customer_out_time, 'DD-MON-YYYY HH:MI') AS customerf_out_time,
+    a.username AS assigned_to_name,
+	u.username AS contact_person_name,
+	c.company_name,
+    COALESCE(
+        JSON_AGG(
+            JSON_BUILD_OBJECT(
+                'solution_id', s.solution_id,
+                'problem', s.problem,
+                'actions', s.actions,
+                'status', s.service_status,
+                'completion_date', TO_CHAR(s.status_date, 'DD-MON-YYYY'),
+                'status_remark', s.status_remark,
+                'customer_remark', s.customer_feedback
+            )
+        ) FILTER (WHERE s.solution_id IS NOT NULL), 
+        '[]' -- If no solutions exist, return an empty array
+    ) AS solutions
+FROM service.ticket AS t
+LEFT JOIN public.users AS a ON t.assigned_to = a.userid
+LEFT JOIN public.users AS u ON t.contact_person = u.userid
+LEFT JOIN public.company AS c ON t.company_id = c.company_id
+LEFT JOIN service.solution AS s ON t.sr_id = s.sr_id
+Where t.sr_status IN ('Z') 
+AND t.sr_date BETWEEN $1 AND $2
+GROUP BY t.sr_id, a.username,u.username,c.company_name`;
+    const results = await db.raw(query,[data.from_date,data.to_date]);
+    return results;
+}
+
+
+
+const deleteTicket = async (id) => {
+    const ticketTable = `service.ticket`;
+    const result = await db.delete(ticketTable, [`sr_id = '${id}'`]);
+    return result;
+}
+
+
+const updateTicket = async (data,id) => {
+    const ticketTable = `service.ticket`;
+    const result = await db.update(ticketTable,data, [`sr_id = '${id}'`]);
+    return result;
+}
+
+
+
+module.exports = {
+    createTicket,
+    getAllTickets,
+    getTicket,
+    getCustomerTickets,
+    getAssignTickets,
+    getAssignedTickets,
+    getCloseTickets,
+    getTicketsReport,
+    deleteTicket,
+    updateTicket
+    
+}

@@ -6,6 +6,7 @@ export const solutionService = {
   addSolution,
   updateSolution,
   uploadAttachment,
+  deleteAttachment,
   deleteSolution,
 };
 
@@ -27,6 +28,10 @@ function updateSolution(data: any,id : number) {
 
 function uploadAttachment(data: any,id : number) {
   return UPLOAD_UPDATE_CALL_AUTH("/solutions/attachment/"+id, data);
+}
+
+function deleteAttachment(data: any,id : number) {
+  return UPDATE_CALL_AUTH("/solutions/delete-attachment/"+id, data);
 }
 
 function deleteSolution(id : number) {

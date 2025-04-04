@@ -534,6 +534,47 @@ const handleRowChange = (id:any, field: string, value: any,index: number) => {
 
 };
 
+const handleFileDelete = async (id : number,image_path : any,attachments : any,field :any) => {
+  
+  const isConfirmed = window.confirm("Are you sure you want to delete this attachment?");
+  if (!isConfirmed) return;
+  setLoading(true);
+  try {
+    const updatedAttachments = attachments.filter((attachment:any) => attachment !== image_path);
+   console.log(updatedAttachments);
+    const response = await solutionService.deleteAttachment({updatedAttachments, field, image_path},id);
+    console.log(response.solution);
+    if(response.response === "Success"){
+      console.log(response.solution);
+        if(field == 'before_attachments'){
+          setTableData((prev) => prev.map((row) =>
+            row.solution_id === response.solution.solution_id ? { ...row, before_attachments: response.solution.before_attachments } : row
+        )
+    );
+    setSolutions((prev) => prev.map((row) =>
+      row.solution_id === response.solution.solution_id ? { ...row, before_attachments: response.solution.before_attachments } : row
+  )
+);
+        }
+        if(field == 'after_attachments'){
+          setTableData((prev) => prev.map((row) =>
+            row.solution_id === response.solution.solution_id ? { ...row, after_attachments: response.solution.after_attachments } : row
+        )
+    );
+    setSolutions((prev) => prev.map((row) =>
+      row.solution_id === response.solution.solution_id ? { ...row, after_attachments: response.solution.after_attachments } : row
+  )
+);
+        }
+    }
+    } catch (error) {
+    return('Something Went Wrong');
+} finally{
+  setLoading(false);
+}
+
+};
+
   return (
     <div>
                 {/* <ul className="flex space-x-2 rtl:space-x-reverse">
@@ -700,6 +741,8 @@ const handleRowChange = (id:any, field: string, value: any,index: number) => {
             {
                 accessor: "attachments",
                 title: "Attachments",
+                textAlign : "center",
+                width:160,
                 render: (row) => (
                   <div className="flex space-x-2">
                     <ul>
@@ -713,7 +756,18 @@ const handleRowChange = (id:any, field: string, value: any,index: number) => {
                     </label>
                     {row.before_attachments && row.before_attachments.length > 0 ? (
                       row.before_attachments.map((attachment : any, index : number) => (
-                        <li><a className="text-blue-500 cursor-pointer " onClick={() => handlePreview(attachment)}>Attachment {index + 1}</a></li>
+                        <li className="flex"><a className="text-blue-500 cursor-pointer " onClick={() => handlePreview(attachment)}>Attachment {index + 1}</a> 
+                        {ticket.sr_status !== 'Z' &&                                                                                 
+                        <button type="button" className="flex ml-4 hover:text-danger" onClick={() => handleFileDelete(Number(row.solution_id),attachment,row.before_attachments,'before_attachments')}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5">
+                        <path d="M20.5001 6H3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"></path>
+                        <path d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" ></path>
+                        <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"></path>
+                        <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"></path>
+                        <path opacity="0.5" d="M6.5 6C6.55588 6 6.58382 6 6.60915 5.99936C7.43259 5.97849 8.15902 5.45491 8.43922 4.68032C8.44784 4.65649 8.45667 4.62999 8.47434 4.57697L8.57143 4.28571C8.65431 4.03708 8.69575 3.91276 8.75071 3.8072C8.97001 3.38607 9.37574 3.09364 9.84461 3.01877C9.96213 3 10.0932 3 10.3553 3H13.6447C13.9068 3 14.0379 3 14.1554 3.01877C14.6243 3.09364 15.03 3.38607 15.2493 3.8072C15.3043 3.91276 15.3457 4.03708 15.4286 4.28571L15.5257 4.57697C15.5433 4.62992 15.5522 4.65651 15.5608 4.68032C15.841 5.45491 16.5674 5.97849 17.3909 5.99936C17.4162 6 17.4441 6 17.5 6" stroke="currentColor" strokeWidth="1.5" ></path>
+                        </svg>
+                        </button>
+            }</li>
                       ))
                     ) : (
                       <span>No Attachments</span>
@@ -725,6 +779,7 @@ const handleRowChange = (id:any, field: string, value: any,index: number) => {
               {
                 accessor: "action",
                 title: "Action",
+                textAlign : "center",
                 render: (row,index) => (
 <textarea
 value={row.actions}
@@ -751,6 +806,8 @@ overflow: "hidden",
                 {
                   accessor: "attachments",
                   title: "Solved Attachments",
+                  textAlign : "center",
+                  // width:160,
                   render: (row) => (
                     <div className="flex space-x-2"><ul>
                       <label className=" flex cursor-pointer justify-center">
@@ -763,7 +820,18 @@ overflow: "hidden",
                     </label>
                       {row.after_attachments && row.after_attachments.length > 0 ? (
                         row.after_attachments.map((attachment : any, index : number) => (
-                          <li><a className="text-blue-500 cursor-pointer " onClick={() => handlePreview(attachment)}>Attachment {index + 1}</a></li>
+                          <li className="flex"><a className="text-blue-500 cursor-pointer " onClick={() => handlePreview(attachment)}>Attachment {index + 1}</a>
+                          {ticket.sr_status !== 'Z' &&
+                            <button type="button" className="flex ml-4 hover:text-danger" onClick={() => handleFileDelete(Number(row.solution_id),attachment,row.after_attachments,'after_attachments')}>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5">
+                              <path d="M20.5001 6H3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"></path>
+                              <path d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" ></path>
+                              <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"></path>
+                              <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"></path>
+                              <path opacity="0.5" d="M6.5 6C6.55588 6 6.58382 6 6.60915 5.99936C7.43259 5.97849 8.15902 5.45491 8.43922 4.68032C8.44784 4.65649 8.45667 4.62999 8.47434 4.57697L8.57143 4.28571C8.65431 4.03708 8.69575 3.91276 8.75071 3.8072C8.97001 3.38607 9.37574 3.09364 9.84461 3.01877C9.96213 3 10.0932 3 10.3553 3H13.6447C13.9068 3 14.0379 3 14.1554 3.01877C14.6243 3.09364 15.03 3.38607 15.2493 3.8072C15.3043 3.91276 15.3457 4.03708 15.4286 4.28571L15.5257 4.57697C15.5433 4.62992 15.5522 4.65651 15.5608 4.68032C15.841 5.45491 16.5674 5.97849 17.3909 5.99936C17.4162 6 17.4441 6 17.5 6" stroke="currentColor" strokeWidth="1.5" ></path>
+                              </svg>
+                            </button>
+                }</li>
                         ))
                       ) : (
                         <span>No Attachments</span>
@@ -775,6 +843,7 @@ overflow: "hidden",
             {
               accessor: "solved",
               title: "SR Status",
+              textAlign : "center",
               render: (row,index) => (
                 <select name="Status" className="p-1 border-0 rounded " 
                 disabled={loading || ['X', 'P', 'Z'].includes(ticket.sr_status)}
@@ -794,6 +863,7 @@ overflow: "hidden",
             {
               accessor: "Solvedate",
               title: "Target/completion Date",
+              textAlign : "center",
               render: (row,index) => (
               <Flatpickr
                               value={row.status_date}
@@ -815,11 +885,6 @@ overflow: "hidden",
 defaultValue={row.status_remark}
 disabled={loading || ['X', 'P', 'Z'].includes(ticket.sr_status)}
 onChange={(e) => handleRowChange(row.solution_id, "status_remark", e.target.value,index)}
-// onBlur={(e) => {
-//   if (status_remark !== e.target.value.trim()) {
-//     handleEditRow(solution_id, "status_remark", e.target.value);
-//   }
-// }}
 className="form-input w-full bg-transparent border-0 focus:outline-none resize-none"
 onInput={(e) => {
 const target = e.target as HTMLTextAreaElement; 
@@ -843,7 +908,6 @@ overflow: "hidden",
                 title: "Responsiblity",
                 render: (row,index) => (
                    <select name="Agent" className="p-1 border-0 rounded"
-                  //  disabled={loading  || (ticket.sr_status !=='X' && ticket.sr_status !=='P' && ticket.sr_status !=='Z')}
                   disabled={loading || ['X', 'P', 'Z'].includes(ticket.sr_status)}
                     defaultValue={row.responsibility}  onChange={(e) => handleRowChange(row.solution_id, "responsibility", e.target.value,index)}>
                       <option value=" ">Assign</option>

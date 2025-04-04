@@ -47,11 +47,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* @media print {
-    .page-break {
-        page-break-before: always;
-    }
-} */
+
 @media print {
     /* Ensure the header is visible on every printed page */
 

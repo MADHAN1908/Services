@@ -9,6 +9,7 @@ router.post("/add/",auth.verifyToken, solutionController.addSolution);
 router.get("/:id", solutionController.getTicketSolutions);
 router.put("/edit/:id" ,solutionController.updateSolution);
 router.put("/attachment/:id",auth.verifyToken,upload.single('image'), solutionController.uploadAttachment);
+router.put("/delete-attachment/:id",auth.verifyToken, solutionController.deleteAttachment);
 router.delete("/delete/:id", solutionController.deleteSolution);
 
 module.exports = router;

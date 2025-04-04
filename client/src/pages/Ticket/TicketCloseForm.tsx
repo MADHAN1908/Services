@@ -64,6 +64,7 @@ const TicketCloseForm = () => {
         const [customerComment, setCustomerComment] = useState("");
         const [editSR, setEditSR] = useState(true);
         const [loader, setLoader] = useState(false);
+        const isFirstRender = useRef(true);
         let userID;
 
         useEffect(() => {
@@ -87,6 +88,10 @@ const TicketCloseForm = () => {
 
             useEffect(() => {
             const handleNavigation = () => {
+              if (isFirstRender.current) {
+                isFirstRender.current = false; // Skip first render
+                return;
+            }
                   const confirmLeave = window.confirm("You have unsaved changes. Leave anyway?");
                   if (!confirmLeave) {
                     navigate(location.pathname, { replace: true }); 
@@ -743,7 +748,7 @@ const TicketCloseForm = () => {
                                         value={formData.assigned_by}
                                     onChange={(e) => setFormData({...formData,assigned_by:Number(e.target.value) })}
                                     disabled={editSR === false} >
-                                        <option value={userID}>Self</option>
+                                        <option value="">Choose Assigned By</option>
                                         {assignedByUsers.map((user) =>
                                                  <option value={user.userid}>{user.username} ({user.role})</option>
                                                  )}
@@ -757,7 +762,7 @@ const TicketCloseForm = () => {
                                     // className="p-1 border-0 rounded"
                                         className="form-select"
                                         disabled={editSR === false} >
-                                        <option value={userID}>Self</option>
+                                        <option value="">Choose Assigned To</option>
                                         {users.map((user) =>
                                                  <option value={user.userid}>{user.username}</option>
                                                  )}

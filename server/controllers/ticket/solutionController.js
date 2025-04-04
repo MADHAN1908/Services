@@ -1,5 +1,7 @@
 
 const solutionModel = require('../../model/solutionModel');
+const fs = require("fs");
+const path = require("path");
 
 
   const createSolution = async (req, res) => {
@@ -147,6 +149,30 @@ const uploadAttachment = async (req, res) => {
         }
 }
 
+const deleteAttachment = async (req, res) => {
+    const id = parseInt(req.params.id);
+    const updateSolution = {};
+    if (req.body.field == "before_attachments"){
+        updateSolution.before_attachments = JSON.stringify(req.body.updatedAttachments ?  req.body.updatedAttachments  : []); 
+    }
+    if (req.body.field == "after_attachments"){
+        updateSolution.after_attachments = JSON.stringify(req.body.updatedAttachments ?  req.body.updatedAttachments : []);
+    }
+        const filePath = path.join(__dirname, "../../uploads", path.basename(req.body.image_path));
+        console.log("Attempting to delete:", filePath);
+        if (fs.existsSync(filePath)) {
+            console.log(1);
+            fs.unlinkSync(filePath); 
+        }
+    
+   
+        let results = await solutionModel.uploadAttachment(id, updateSolution);
+        if(results){
+        return res.status(200).json({ 'response': 'Success','solution':results[0] });
+        }else{
+            return res.status(400).json({ 'response': 'Failure', "message": 'error in creating' });
+        }
+}
 
 module.exports = {
     createSolution,
@@ -154,6 +180,6 @@ module.exports = {
     getTicketSolutions,
     deleteSolution,
     updateSolution,
-    uploadAttachment
-    
+    uploadAttachment,
+    deleteAttachment
 }

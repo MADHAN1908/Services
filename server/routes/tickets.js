@@ -5,7 +5,7 @@ const auth = require('../middleware/auth');
 
 router.post("/create",auth.verifyToken, ticketController.createTicket);
 router.post("/add",auth.verifyToken, ticketController.addTicket);
-router.get("/All", ticketController.getAllTickets);
+router.get("/All",auth.verifyToken, ticketController.getAllTickets);
 router.get("/customer",auth.verifyToken, ticketController.getCustomerTickets);
 router.get("/assign",auth.verifyToken, ticketController.getAssignTickets);
 router.get("/assigned",auth.verifyToken, ticketController.getAssignedTickets);

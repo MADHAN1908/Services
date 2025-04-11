@@ -87,7 +87,6 @@ const AddTicket = () => {
 
         const handleContactPerson = async (id:number) => {
             try {
-                // console.log(id);
                 const response = await userService.getContactPerson(id);
                 console.log("Received Customer Contacts:", response.CustomerContacts);
                 console.log(response.CustomerContacts);

@@ -2,6 +2,7 @@ import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useState, useEffect } from 'react';
 import { expenseService } from '../../services/expenseService';
+import { ticketService } from '../../services/ticketService';
 import { getExpenseType } from '../../utils/commonFunction';
 import sortBy from 'lodash/sortBy';
 import { useDispatch } from 'react-redux';
@@ -11,6 +12,7 @@ import { setPageTitle } from '../../store/themeConfigSlice';
 const TicketExpenses = () => {
     const dispatch = useDispatch();
     const [items, setItems] = useState<any[]>([]);
+    const [ticket,setTicket] = useState<any>({});
     const { id  } =useParams();
 
     const navigate = useNavigate();
@@ -25,6 +27,14 @@ const TicketExpenses = () => {
             navigate('/auth/login');
         }
     }, [userAuthDetail]);
+    const GetTicket = async () => {
+              try {
+                  const response = await ticketService.getTicket(Number(id));
+                  setTicket(response.TicketDetails);
+              } catch (error) {
+                  return ('Something Went Wrong');
+              }
+          }
 
      const GetTicketExpenses = async () => {
             try {
@@ -38,6 +48,7 @@ const TicketExpenses = () => {
         
         useEffect(() => {
             dispatch(setPageTitle('Ticket Expenses'));
+            GetTicket();
             GetTicketExpenses();
         },[]); 
 
@@ -80,8 +91,8 @@ const TicketExpenses = () => {
         <div className="panel px-0 border-white-light dark:border-[#1b2e4b]">
             <div className="invoice-table">
                 <div className="mb-4.5 px-5 flex md:items-center md:flex-row flex-col gap-5">
-                <div className="flex  items-center w-72 gap-2">
-                       
+                <div className="flex  items-center w-72 gap-2">  
+                    { ticket.sr_status !== 'Z' &&
                        <Link to={`/sr/expenses/add/${id}`} className="btn btn-primary  gap-2">
                            <svg className="w-5 h-5" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
                                <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -89,6 +100,7 @@ const TicketExpenses = () => {
                            </svg>
                            Add Expenses
                        </Link>
+}
                    </div>
                    <div className="flex  items-center w-72 gap-2">
                 <h3 className="flex text-xl w-full font-semibold justify-center"> Service Request Expenses </h3>
@@ -133,7 +145,7 @@ const TicketExpenses = () => {
                                 textAlign: 'center',
                                 render: ({ sr_id }) => (
                                     <div className="flex gap-4 items-center w-max mx-auto">
-                                        <button type="button"  className="flex hover:text-danger" onClick={(e) => handleDeleteRow(sr_id)}>
+                                        <button type="button" disabled={ticket.sr_status === "Z"}  className="flex hover:text-danger" onClick={(e) => handleDeleteRow(sr_id)}>
                                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5">
                                                 <path d="M20.5001 6H3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"></path>
                                                 <path

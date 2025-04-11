@@ -149,7 +149,7 @@ const TicketList = () => {
                                 // width:80,
                                 render: ({ sr_id }) => (
                                     <div className="flex gap-4 items-center w-max mx-auto">
-                                        <NavLink to={`/sr/solution/${sr_id}`} className="flex hover:text-info">
+                                        <NavLink to={`/sr/solution/view/${sr_id}`} className="flex hover:text-info">
                                         <svg
             xmlns="http://www.w3.org/2000/svg"
             width={24}

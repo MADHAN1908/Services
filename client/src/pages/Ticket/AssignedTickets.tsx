@@ -162,7 +162,7 @@ const AssignedTicket = () => {
                                 textAlign: 'center',
                                 render: ({ sr_id }) => (
                                     <div className="flex gap-4 items-center w-max mx-auto">
-                                        <NavLink to={`/sr/solution/${sr_id}`} className="flex hover:text-info">
+                                        <NavLink to={role === "Employee" ? `/sr/solution/${sr_id}` : `/sr/solution/view/${sr_id}`} className="flex hover:text-info">
                                         <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-6 h-6 `} >
                                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                         <circle cx="12" cy="12" r="3"></circle>
@@ -185,21 +185,38 @@ const AssignedTicket = () => {
                                    }
                                     </div>
                                 ),
-                            },{
+                            },
+                            // {
+                            //     accessor: '',
+                            //     title:'Expense',
+                            //     textAlignment: 'center',
+                            //     width:100,
+                            //     render: ({ sr_id,sr_status }) => (
+                            //         <div className='flex justify-center font-semibold'>
+                            //        {sr_status !== 'Z' && (['P','W', 'C','Y'].includes(sr_status)) &&
+                            //         <NavLink to={`/sr/expenses/${sr_id}`} className="btn btn-primary">
+                            //             Expense
+                            //            </NavLink>
+                            //        }
+                            //         </div>
+                            //     ),
+                            // }
+                        ]:[]),
+                            {
                                 accessor: '',
                                 title:'Expense',
                                 textAlignment: 'center',
                                 width:100,
                                 render: ({ sr_id,sr_status }) => (
                                     <div className='flex justify-center font-semibold'>
-                                   {sr_status !== 'Z' && (['P','W', 'C','Y'].includes(sr_status)) &&
+                                   { (['P','W', 'C','Y','Z'].includes(sr_status)) &&
                                     <NavLink to={`/sr/expenses/${sr_id}`} className="btn btn-primary">
                                         Expense
                                        </NavLink>
                                    }
                                     </div>
                                 ),
-                            }]:[]),
+                            },
                             {
                                 accessor: 'Arrive by',
                                 sortable: false,

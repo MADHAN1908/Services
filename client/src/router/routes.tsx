@@ -22,6 +22,7 @@ const CustomerTicketDetails = lazy(() => import('../pages/Ticket/CustomerTicketD
 const AssignTicket = lazy(() => import('../pages/Ticket/AssignTicket'));
 const AssignedTickets = lazy(() => import('../pages/Ticket/AssignedTickets'));
 const TicketDetails = lazy(() => import('../pages/Ticket/TicketDetails'));
+const ViewTicketDetails = lazy(() => import('../pages/Ticket/ViewTicketDetails'));
 const TicketPrivilege = lazy(() => import('../pages/Ticket/TicketPrivilege'));
 const Report = lazy(() => import('../pages/Ticket/Report'));
 
@@ -120,6 +121,10 @@ const routes = [
     {
         path: '/sr/solution/:id',
         element: <TicketDetails />,
+    },
+    {
+        path: '/sr/solution/view/:id',
+        element: <ViewTicketDetails />,
     },
     {
         path: '/sr/privilege',

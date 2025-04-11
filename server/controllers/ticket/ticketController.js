@@ -64,7 +64,8 @@ const getTicket = async (req, res) => {
 }
 
 const getAllTickets = async (req, res) => {
-    const getAllTickets = await ticketModel.getAllTickets();
+    const user = req.user;
+    const getAllTickets = await ticketModel.getAllTickets(user);
     if (getAllTickets) {
         return res.status(200).json({ 'response': 'Success', 'TicketDetails': getAllTickets });
     }
@@ -72,7 +73,6 @@ const getAllTickets = async (req, res) => {
         return res.status(400).json({ 'response': 'Success', "message": 'Not found' });
     }
 }
-
 
 
 const getCustomerTickets = async (req, res) => {
@@ -85,6 +85,7 @@ const getCustomerTickets = async (req, res) => {
         return res.status(400).json({ 'response': 'Success', "message": 'Not found' });
     }
 }
+
 const getAssignTickets = async (req, res) => {
     const getAssignTickets = await ticketModel.getAssignTickets();
     if (getAssignTickets) {

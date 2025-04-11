@@ -189,7 +189,7 @@ const AssignTicket = () => {
                                 textAlign: 'center',
                                 render: ({ sr_id }) => (
                                     <div className="flex gap-4 items-center w-max mx-auto">
-                                        <NavLink to={`/sr/solution/${sr_id}`} className="flex hover:text-info">
+                                        <NavLink to={`/sr/solution/view/${sr_id}`} className="flex hover:text-info">
                                         <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-6 h-6 `} >
                                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                         <circle cx="12" cy="12" r="3"></circle>

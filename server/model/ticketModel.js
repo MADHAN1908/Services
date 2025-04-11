@@ -15,11 +15,21 @@ const getTicket = async (id) => {
     return result[0];
 }
 
-const getAllTickets = async () => {
-
-    const query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name,a.username as assigned_to_name FROM service.ticket AS t
+const getAllTickets = async (user) => {
+    let query;
+    if (user.role === "Admin"){
+     query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name,a.username as assigned_to_name FROM service.ticket AS t
  INNER JOIN public.users AS u ON t.contact_person = u.userid
  LEFT JOIN public.users AS a ON t.assigned_to = a.userid ORDER BY reported_date DESC`;
+    }else if (user.role === "Manager"){
+        query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name,a.username as assigned_to_name FROM service.ticket AS t
+    INNER JOIN public.users AS u ON t.contact_person = u.userid
+    LEFT JOIN public.users AS a ON t.assigned_to = a.userid Where t.assigned_by = ${user.id} OR t.created_by = ${user.id} ORDER BY reported_date DESC`;
+       }else if (user.role === "Employee"){
+        query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name,a.username as assigned_to_name FROM service.ticket AS t
+    INNER JOIN public.users AS u ON t.contact_person = u.userid
+    LEFT JOIN public.users AS a ON t.assigned_to = a.userid Where t.assigned_to = ${user.id} OR t.created_by = ${user.id} ORDER BY reported_date DESC`;
+       }
     const results = await db.raw(query);
     return results;
 }
@@ -62,12 +72,7 @@ const getAssignedTickets = async (id,role) => {
  LEFT JOIN public.users AS u 
  ON t.contact_person = u.userid 
  WHERE  t.assigned_to = ${id}  ORDER BY reported_date DESC`;}
-//  else{
-//      query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name FROM service.ticket AS t
-//  LEFT JOIN public.users AS u 
-//  ON t.contact_person = u.userid 
-//  WHERE  t.assigned_to = ${id}  ORDER BY reported_date DESC`;
-//     }
+
     const results = await db.raw(query);
     return results;
 }

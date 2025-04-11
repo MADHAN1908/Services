@@ -575,6 +575,8 @@ const handleFileDelete = async (id : number,image_path : any,attachments : any,f
 
 };
 
+const allCompleted = solutions.length > 0 && solutions.every(row => row.service_status === 'C');
+
   return (
     <div>
                 {/* <ul className="flex space-x-2 rtl:space-x-reverse">
@@ -612,22 +614,38 @@ const handleFileDelete = async (id : number,image_path : any,attachments : any,f
           <p className="text-gray-700">Machine: {ticket.machine}</p>
           <p className="text-gray-700">Arrive Date: {ticket.plan_in_date}</p>
           <div className="space-x-4 my-2 ">
-        {(ticket.act_in_time==null &&  ticket.plan_in_date && ticket.sr_status !== 'X' ) &&
+        {/* {(ticket.act_in_time==null &&  ticket.plan_in_date && ticket.sr_status !== 'X' ) &&
           <button
             className="px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600"
             onClick={(e)=>handleArriveDate(ticket.sr_id,'act_in_time')}
           >
             Arrived
           </button>
+} */}
+ {( !ticket.act_in_time && ticket.plan_in_date && ticket.sr_status !== 'X' ) &&
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600"
+            onClick={(e)=>handleArriveDate(ticket.sr_id,'act_in_time')}
+          >
+            Start
+          </button>
 }
-          {(ticket.act_in_time && ticket.act_out_time==null) &&
+{allCompleted &&
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600"
+            onClick={(e)=>handleArriveDate(ticket.sr_id,'act_out_time')}
+          >
+            Completed
+          </button>
+}
+          {/* {(ticket.act_in_time && ticket.act_out_time==null) &&
           <button
             className="px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600"
             onClick={(e)=>handleArriveDate(ticket.sr_id,'act_out_time')}
           >
             Depart
           </button>
-}
+} */}
           </div>
           {/* <p className="text-gray-700">Arrive Time: {ticket.time}</p> */}
         </div>

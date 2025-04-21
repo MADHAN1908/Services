@@ -5,11 +5,16 @@ import { Link, useNavigate ,useParams} from 'react-router-dom';
 import { expenseService } from '../../services/expenseService';
 import { Button,LoadingOverlay } from "@mantine/core";
 import { showToast } from '../../utils/commonFunction';
+import Flatpickr from 'react-flatpickr';
+import "flatpickr/dist/themes/airbnb.css";
+import 'flatpickr/dist/flatpickr.css';
 
 interface FormData {
     sr_id:number | '',
     expense_type:string,
-    amount:number,
+    description:string,
+    expense_date:Date,
+    amount:number |'',
     attachments: File[],
 }
 const AddExpense = () => {
@@ -17,10 +22,14 @@ const AddExpense = () => {
     const navigate = useNavigate();
     const { id  } =useParams();
     const fileInputRef = useRef(null);
+    const now = new Date();
+    const minDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
     const [formData, setFormData] = useState<FormData>({
         sr_id:Number(id),
         expense_type:'',
-        amount: 0,
+        description:'',
+        expense_date:new Date(),
+        amount: '',
         attachments: [],
     });
     // const userAuthDetail = JSON.parse(sessionStorage.getItem('user'))  ;
@@ -79,7 +88,8 @@ const AddExpense = () => {
     const validateForm = () => {
         if (!formData.sr_id) return "ticket ID is required.";
         if (!formData.expense_type) return "Expense Type is required.";
-        if (formData.amount <= 0 ) return "Amount is required.";
+        if (!formData.amount || formData.amount <= 0  ) return "Amount is required.";
+        if (!formData.description) return "Description is required.";
         
         return null; 
     };
@@ -115,6 +125,8 @@ const AddExpense = () => {
                             setFormData({
                                 sr_id:Number(id),
                                 expense_type:'',
+                                description:'',
+                                expense_date:new Date(),
                                 amount: 0,
                                 attachments: [],
                             });
@@ -174,7 +186,7 @@ const AddExpense = () => {
       )}
                     <div className="mb-5">
                         <form className="space-y-5" onSubmit={handleSubmit}>
-                        <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                                     <label htmlFor="expense_type">Expense Type *</label>
                                     <select name="expense_type"
@@ -189,6 +201,37 @@ const AddExpense = () => {
                                          
                                     </select>
                                 </div>
+
+                                <div>
+                                    <label htmlFor="Date">Expense Date *</label>
+                                                                
+                                    <Flatpickr
+                                        value={ formData.expense_date}
+                                        options={{
+                                            dateFormat: 'd-M-Y',
+                                            position: 'auto left',
+                                            minDate: minDate, // 1 week before today
+                                            maxDate: new Date().setMonth(new Date().getMonth() + 1), // 1 month after today
+                                        }}
+                                        className="form-input"
+                                        onChange={(date) =>{
+                                            setFormData({...formData,expense_date:date[0]});
+                                            console.log(date[0],formData.expense_date)
+                                        }}
+                                    />
+                                </div>
+                                
+                                <div>
+               <label className="block text-gray-700 font-medium">Description :</label>
+               <textarea
+                 value={ formData.description}
+                 onChange={(e) => setFormData({ ...formData,description: e.target.value })}
+                 className="w-full p-2 border rounded"
+                 placeholder="Add a description"
+               />
+             </div>
+
+                                
                         <div>
                                     <label htmlFor="amount">Amount *</label>
                                     <input type='number' name="amount"
@@ -197,7 +240,7 @@ const AddExpense = () => {
                                         className="form-input"
                                         />
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"> */}
                                 <div>
                                     <label htmlFor="attachment">Attachment *</label>
                                     <input name="attachment" type="file"  className="form-input"
@@ -225,7 +268,7 @@ const AddExpense = () => {
                                                 <span>No Attachments</span>
                                             )}
                                         </ul></div>
-                                </div>
+                                {/* </div> */}
                                 </div>
                                 
 {loader &&

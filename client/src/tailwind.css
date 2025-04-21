@@ -157,7 +157,7 @@
 
     .page-break {
         page-break-before: always;
-        margin-top: 40mm;
+        margin-top: 0mm;
     }
   }
   

@@ -174,6 +174,21 @@ const TicketExpenses = () => {
                                 render: ({ expense_type }) => <div className="flex  justify-center font-semibold">{getExpenseType(expense_type)}</div>,
                             },
                             {
+                                accessor: 'expenses_date',
+                                title:'Expenses Date',
+                                sortable: true,
+                                render: ({ formatted_expense_date }) => <div className="flex  justify-center font-semibold">{formatted_expense_date}</div>,
+                            },
+                            {
+                                accessor: 'Description',
+                                sortable: true,
+                                render: ({ description }) => (
+                                    <div className="flex items-center font-semibold">
+                                        <div>{description}</div>
+                                    </div>
+                                ),
+                            },
+                            {
                                 accessor: 'Amount',
                                 title: 'Amount',
                                 // sortable: true,

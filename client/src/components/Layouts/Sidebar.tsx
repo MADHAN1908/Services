@@ -403,7 +403,7 @@ const Sidebar = () => {
                                 </NavLink>
                             </li>
                             )} */}
-                            { role=='Admin'  && (
+                            { (role=='Admin'|| role=='Manager' || role=='Employee')  && (
                             <li className="nav-item">
                                 <NavLink to="/sr/report" className="group">
                                     <div className="flex items-center">

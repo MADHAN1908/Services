@@ -3,6 +3,7 @@ const ticketModel = require('../../model/ticketModel');
 
 const createTicket = async (req, res) => {
  const user = req.user;
+ console.log(req.body);
     const newTicket = {
         sr_desc: req.body.sr_desc,
         sr_date: req.body.reported_date,
@@ -25,6 +26,7 @@ const createTicket = async (req, res) => {
 
 const addTicket = async (req, res) => {
     const user = req.user;
+    console.log(req.body);
        const newTicket = {
            sr_desc: req.body.sr_desc,
            sr_date: req.body.reported_date,
@@ -119,13 +121,14 @@ const getCloseTickets = async (req, res) => {
 }
 
 const getTicketsReport = async (req, res) => {
+    console.log(req.body);
     const user = req.user;
     var UpdateArray ={};
     if (req.body.from_date)
         UpdateArray.from_date =`'${new Date(req.body.from_date).toISOString().split('T')[0]}'`;
     if(req.body.to_date)
         UpdateArray.to_date = `'${new Date(req.body.to_date).toISOString().split('T')[0]}'`;
-    const TicketsReport = await ticketModel.getTicketsReport(UpdateArray);
+    const TicketsReport = await ticketModel.getTicketsReport(UpdateArray,user);
     if (TicketsReport) {
         return res.status(200).json({ 'response': 'Success', 'TicketsReport': TicketsReport });
     }
@@ -157,6 +160,11 @@ const updateTicket = async (req, res) => {
     }
     if (req.body.status)
         UpdateArray.sr_status = req.body.status;
+
+    if (req.body.status == 'Z'){
+        UpdateArray.closed_at = new Date().toISOString();
+        UpdateArray.closed_by = user.id;
+    }
     if(req.body.date)
         UpdateArray.plan_in_time = req.body.date;
     if (req.body.act_in_time)

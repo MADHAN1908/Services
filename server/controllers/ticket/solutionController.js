@@ -73,11 +73,6 @@ const getTicketSolutions = async (req, res) => {
     }
 }
 
-
-
-
-
-
 const deleteSolution = async (req, res) => {
     const id = parseInt(req.params.id);
         try {
@@ -109,9 +104,11 @@ const updateSolution = async (req, res) => {
     if (req.body.status_date) {
         UpdateArray.status_date = req.body.status_date;
     }
-    if (req.body.customer_acceptance== true || req.body.customer_acceptance== false) {
-        UpdateArray.customer_acceptance = req.body.customer_acceptance;
-    }
+    if(req.body.customer_acceptance){
+       if (req.body.customer_acceptance == true || req.body.customer_acceptance== false) {
+           UpdateArray.customer_acceptance = req.body.customer_acceptance;
+       }
+}
     if (req.body.customer_feedback) {
         UpdateArray.customer_feedback = req.body.customer_feedback;
     }
@@ -129,6 +126,7 @@ const updateSolution = async (req, res) => {
 const uploadAttachment = async (req, res) => {
     const id = parseInt(req.params.id);
     const updateSolution = {};
+    console.log(req.body);
     if (req.body.before_attachment_upload){
     const existingPhotos = req.body.before_attachments ? (Array.isArray(req.body.before_attachments) ? req.body.before_attachments : [req.body.before_attachments]) : [];
     const uploadedFile = req.file ? `/uploads/${req.file.filename}` : null;
@@ -151,6 +149,7 @@ const uploadAttachment = async (req, res) => {
 
 const deleteAttachment = async (req, res) => {
     const id = parseInt(req.params.id);
+    console.log(req.body);
     const updateSolution = {};
     if (req.body.field == "before_attachments"){
         updateSolution.before_attachments = JSON.stringify(req.body.updatedAttachments ?  req.body.updatedAttachments  : []); 

@@ -97,6 +97,8 @@ const Report = () => {
                             <button type='button'  onClick={() => handleSubmit()} className="btn btn-primary !mt-6">
                                 Submit
                             </button>
+                            {ticket && 
+                             <div>Records : {ticket.length}</div>}
                             {ticket && ticket.length > 0 &&
                             <button type='button'  onClick={() => handlePrint()} className="btn btn-primary !mt-6">
                                 Print

@@ -60,18 +60,33 @@ const getAssignedTickets = async (id,role) => {
         query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date ,TO_CHAR(t.plan_in_time, 'DD-MON-YYYY HH:MM') AS plan_in_date, u.username as contact_person_name FROM service.ticket AS t
  LEFT JOIN public.users AS u 
  ON t.contact_person = u.userid 
+ Where t.sr_status NOT IN ('X')
+ AND (
+        t.sr_status != 'Z'
+        OR (t.sr_status = 'Z' AND DATE(t.closed_at) = CURRENT_DATE) 
+    )
  ORDER BY reported_date DESC`;
     }else if(role == "Manager"){
         // console.log(id,role);
         query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name FROM service.ticket AS t
     LEFT JOIN public.users AS u 
     ON t.contact_person = u.userid 
-    WHERE  t.assigned_by = ${id}  ORDER BY reported_date DESC`;
+    WHERE  t.assigned_by = ${id} AND t.sr_status NOT IN ('X') 
+     AND (
+        t.sr_status != 'Z'
+        OR (t.sr_status = 'Z' AND DATE(t.closed_at) = CURRENT_DATE) 
+    )
+         ORDER BY reported_date DESC`;
        }else{
      query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name FROM service.ticket AS t
  LEFT JOIN public.users AS u 
  ON t.contact_person = u.userid 
- WHERE  t.assigned_to = ${id}  ORDER BY reported_date DESC`;}
+ WHERE  t.assigned_to = ${id} 
+  AND (
+        t.sr_status != 'Z'
+        OR (t.sr_status = 'Z' AND DATE(t.closed_at) = CURRENT_DATE) 
+    )  
+        ORDER BY reported_date DESC`;}
 
     const results = await db.raw(query);
     return results;
@@ -128,9 +143,9 @@ GROUP BY t.sr_id, a.username,u.username,c.company_name`;
     return results;
 }
 
-const getTicketsReport = async (data) => {
+const getTicketsReport = async (data,user) => {
     let query;
-    // console.log(id,role);
+    console.log(user);
         query = `SELECT 
     t.*,
     TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date,
@@ -160,10 +175,9 @@ LEFT JOIN public.users AS a ON t.assigned_to = a.userid
 LEFT JOIN public.users AS u ON t.contact_person = u.userid
 LEFT JOIN public.company AS c ON t.company_id = c.company_id
 LEFT JOIN service.solution AS s ON t.sr_id = s.sr_id
-Where t.sr_status IN ('Z') 
-AND t.sr_date BETWEEN $1 AND $2
-GROUP BY t.sr_id, a.username,u.username,c.company_name`;
-    const results = await db.raw(query,[data.from_date,data.to_date]);
+Where t.sr_status IN ('Z')  ${user.role == "Admin" ? "" : user.role == "Manager" ? `AND t.assigned_by =$3` : `AND t.assigned_to = $3`}
+AND t.sr_date BETWEEN $1 AND $2   GROUP BY t.sr_id, a.username,u.username,c.company_name`;
+    const results = await db.raw(query,[data.from_date,data.to_date,user.id]);
     return results;
 }
 

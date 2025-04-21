@@ -3,10 +3,15 @@ const expenseModel = require('../../model/expenseModel');
 
 const createExpense = async (req, res) => {
  const user = req.user;
+ let expenseDate = new Date(req.body.expense_date);
+let formattedDate = expenseDate.toISOString().split('T')[0];
  const filePaths = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+ console.log(req.body);
     const newExpense = {
         sr_id: req.body.sr_id,
         expense_type: req.body.expense_type,
+        expense_date: formattedDate,
+        description: req.body.description,
         amount: req.body.amount,
         attachments: JSON.stringify(filePaths),
         created_by:user.id,

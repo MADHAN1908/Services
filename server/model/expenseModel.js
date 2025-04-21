@@ -8,7 +8,7 @@ const createExpense = async (data) => {
 }
 
 const getExpenses = async (id) => {
-    const query = `SELECT * from service.expenses Where sr_id = ${id}`;
+    const query = `SELECT * ,TO_CHAR(expense_date, 'DD-Mon-YYYY') AS formatted_expense_date from service.expenses Where sr_id = ${id}`;
     const results = await db.raw(query);
     return results;
 }

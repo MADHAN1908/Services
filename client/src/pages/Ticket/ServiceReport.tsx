@@ -9,9 +9,18 @@ const ServiceReport = forwardRef(({ ticket }: { ticket: any }, ref) => {
     const ticketsArray = Array.isArray(ticket) ? ticket : [ticket];
     return (
                
-<div ref={ref}  className="print-container hidden  print:block">
-  <div className="print-content">
+<div ref={ref}  className="print-container hidden   print:block">
   <div className="">
+  
+    {ticketsArray &&
+      ticketsArray.map((ticket , index) => (
+        <div
+          key={index}
+          className={`max-w-4xl mx-auto  p-4 ${
+            index !== 0 ? "page-break" : ""
+          }`}
+        >
+          <div className="">
     <h2 className="text-center text-lg font-bold">
       VAMTEC MACHINES & AUTOMATION PRIVATE LIMITED
     </h2>
@@ -25,14 +34,6 @@ const ServiceReport = forwardRef(({ ticket }: { ticket: any }, ref) => {
       SERVICE REPORT
     </div>
   </div>
-    {ticketsArray &&
-      ticketsArray.map((ticket , index) => (
-        <div
-          key={index}
-          className={`max-w-4xl mx-auto  border p-6 ${
-            index !== 0 ? "page-break" : ""
-          }`}
-        >
           {/* Ticket-specific details */}
           <table className="w-full border mt-4">
             <tbody>

@@ -610,9 +610,14 @@ const allCompleted = solutions.length > 0 && solutions.every(row => row.service_
       <div className="ticket-info p-2 mb-2 ml-2">
         <h2 className="text-2xl font-bold mb-2">{ticket.sr_desc}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <p className="text-gray-700">Status: {ticket.sr_status? getStatus(ticket.sr_status): ''}</p>
-          <p className="text-gray-700">Machine: {ticket.machine}</p>
-          <p className="text-gray-700">Arrive Date: {ticket.plan_in_date}</p>
+           <p className="text-gray-700">Status: <span className="text-blue-800">{ticket.sr_status? getStatus(ticket.sr_status): ''}</span></p>
+                    <p className="text-gray-700">Machine: <span className="text-blue-800">{ticket.machine}</span></p>
+                    {ticket.plan_in_date && 
+                    <p className="text-gray-700">Arrive Date: <span className="text-blue-800">{ticket.plan_in_date}</span></p>}
+                    {ticket.act_in_date && 
+                    <p className="text-gray-700">IN Time: <span className="text-blue-800">{ticket.act_in_date}</span></p>}
+                    {ticket.act_out_date && 
+                    <p className="text-gray-700">OUT Time: <span className="text-blue-800">{ticket.act_out_date}</span></p>}
           <div className="space-x-4 my-2 ">
         {/* {(ticket.act_in_time==null &&  ticket.plan_in_date && ticket.sr_status !== 'X' ) &&
           <button

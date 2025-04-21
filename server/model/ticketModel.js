@@ -8,7 +8,12 @@ const createTicket = async (data) => {
 }
 
 const getTicket = async (id) => {
-    const query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date,TO_CHAR(t.plan_in_time, 'DD-MON-YYYY HH:MI') AS plan_in_date, u.username as contact_person_name FROM service.ticket AS t
+    const query = `SELECT t.*,
+    TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date,
+    TO_CHAR(t.plan_in_time, 'DD-MON-YYYY HH:MI') AS plan_in_date,
+    TO_CHAR(t.act_in_time, 'DD-MON-YYYY HH:MI') AS act_in_date,
+    TO_CHAR(t.act_out_time, 'DD-MON-YYYY HH:MI') AS act_out_date,
+     u.username as contact_person_name FROM service.ticket AS t
  INNER JOIN public.users AS u ON t.contact_person = u.userid
  Where t.sr_id = ${id}`;
     const result = await db.raw(query);

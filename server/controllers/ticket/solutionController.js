@@ -104,11 +104,9 @@ const updateSolution = async (req, res) => {
     if (req.body.status_date) {
         UpdateArray.status_date = req.body.status_date;
     }
-    if(req.body.customer_acceptance){
        if (req.body.customer_acceptance == true || req.body.customer_acceptance== false) {
            UpdateArray.customer_acceptance = req.body.customer_acceptance;
        }
-}
     if (req.body.customer_feedback) {
         UpdateArray.customer_feedback = req.body.customer_feedback;
     }

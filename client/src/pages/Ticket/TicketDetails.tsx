@@ -893,7 +893,11 @@ overflow: "hidden",
                               disabled={loading || ['X', 'P', 'Z'].includes(ticket.sr_status)}
                               options={{
                                   dateFormat: 'd-M-Y', 
-                                  minDate: new Date(),
+                                  minDate: new Date(
+                                    new Date(ticket.act_in_time).getFullYear(),
+                                    new Date(ticket.act_in_time).getMonth(),
+                                    new Date(ticket.act_in_time).getDate()
+                                  ),
                               }}
                               className={`form-input w-full border-0 opacity-80`}
                               onChange={(date) => handleRowChange(row.solution_id,'status_date',date[0],index)}

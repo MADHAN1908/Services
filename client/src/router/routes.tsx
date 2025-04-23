@@ -23,11 +23,15 @@ const AssignTicket = lazy(() => import('../pages/Ticket/AssignTicket'));
 const AssignedTickets = lazy(() => import('../pages/Ticket/AssignedTickets'));
 const TicketDetails = lazy(() => import('../pages/Ticket/TicketDetails'));
 const ViewTicketDetails = lazy(() => import('../pages/Ticket/ViewTicketDetails'));
-const TicketPrivilege = lazy(() => import('../pages/Ticket/TicketPrivilege'));
 const Report = lazy(() => import('../pages/Ticket/Report'));
 
 const TicketExpenses = lazy(() => import('../pages/Ticket/TicketExpenses'));
 const AddExpense = lazy(() => import('../pages/Ticket/AddExpense'));
+const ExpenseList = lazy(() => import('../pages/Ticket/ExpenseList'));
+
+const CategoryList = lazy(()=> import('../pages/Category/list'))
+const AddCategory = lazy(()=> import('../pages/Category/Add'))
+const EditCategory = lazy(()=> import('../pages/Category/Edit'))
 
 const Index = lazy(() => import('../pages/Index'));
 const ERROR404 = lazy(() => import('../pages/Pages/Error404'));
@@ -127,10 +131,6 @@ const routes = [
         element: <ViewTicketDetails />,
     },
     {
-        path: '/sr/privilege',
-        element: <TicketPrivilege />,
-    },
-    {
         path: '/sr/report',
         element: <Report />,
     },
@@ -141,6 +141,23 @@ const routes = [
     {
         path: '/sr/expenses/add/:id',
         element: <AddExpense />,
+    },
+    {
+        path: '/sr/expenses/list',
+        element: <ExpenseList />,
+    },
+
+    {
+        path: '/category',
+        element: <CategoryList />,
+    },
+    {
+        path: '/category/add',
+        element: <AddCategory />,
+    },
+    {
+        path: '/category/edit/:id',
+        element: <EditCategory />,
     },
     {
 

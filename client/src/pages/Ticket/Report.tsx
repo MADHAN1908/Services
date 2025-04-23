@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ticketService } from '../../services/ticketService';
 import { useReactToPrint } from 'react-to-print';
 import { DatePickerInput, type DatesRangeValue } from '@mantine/dates';
+import { LoadingOverlay } from "@mantine/core";
 import { getServiceType,getStatus } from '../../utils/commonFunction';
 import ServiceReport from './ServiceReport';
 import dayjs from 'dayjs';
@@ -22,6 +23,7 @@ const Report = () => {
       ]);
 
     const [ticket,setTicket]=useState([])
+    const [loader, setLoader] = useState(false);
     useEffect(() => {
         if(!userAuthDetail.token || role =='Manage'){
             navigate('/auth/login');
@@ -34,9 +36,12 @@ const Report = () => {
 
     const handleSubmit = async () => {
         try {
+          setLoader(true);
             const response = await ticketService.getTicketsReport({from_date : srDateRange[0],to_date : srDateRange[1]});
             setTicket(response.TicketsReport);
+            setLoader(false);
             } catch (error) {
+              setLoader(false);
             return ('Something Went Wrong');
         }
     }
@@ -60,7 +65,7 @@ const Report = () => {
                                     <label htmlFor="table">Table *</label>
                                     <select name="table"
                                         className="form-select">
-                                        <option value=" ">Choose Table Name</option>
+                                        {/* <option value=" ">Choose Table Name</option> */}
                                         {/* <option value="1">Users</option> */}
                                         <option value="service_report">Service Report</option>
                                     </select>
@@ -105,6 +110,9 @@ const Report = () => {
                             </button>
 }
                         </form>
+                        {loader &&
+                        <LoadingOverlay visible={loader} loaderProps={{ children: 'Loading...' }} />
+                        }
                     </div>
                     {ticket && <ServiceReport ref={contentRef} ticket={ticket} /> }
                 

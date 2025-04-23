@@ -17,6 +17,7 @@ const TicketDetails = () => {
   const [ticket,setTicket] = useState<any>({});
   const [solutions,setSolutions] = useState<any[]>([]);
   const [date,setDate] = useState<any>('');
+  const [changedData, setChangedData] = useState<{ [key: number]: any }>({});
 
   const GetTicket = async () => {
           try {
@@ -44,19 +45,6 @@ const GetSolutions = async () => {
   const [previewImage, setPreviewImage] = useState('');
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
 
-
-  const handleEditRow =async (id :any, field:any, value:any) => {
-    try {
-      const response = await solutionService.updateSolution({[field] :value,'solution_id':id},id);
-      if(response.response == "Success"){
-          GetSolutions();
-      }
-      } catch (error) {
-      return ('Something Went Wrong');
-  }
-    
-  };
-
   const handleUpdateTime =async (id :any, field:any) => {
     try {
       if(date){
@@ -75,16 +63,37 @@ const GetSolutions = async () => {
   }    
   };
 
+  const handleEditRow = (expenseId: number, field : string , value: any) => {
+    setChangedData((prev) => ({
+      ...prev,
+      [expenseId]: { ...prev[expenseId], [field]: value },
+    }));
+  };
+
+ 
+  const updateRow = async (solutionId: number) => {
+    if (!changedData[solutionId]) return;
+
+    try {
+      await solutionService.updateSolution(changedData[solutionId],solutionId);
+      GetSolutions();
+      setChangedData((prev) => {
+        const newData = { ...prev };
+        delete newData[solutionId];
+        return newData;
+      });
+    } catch (error) {
+      return "Something went wrong" ;
+    }
+  };
+
   const handleSubmitReview =async () => {
     try {
-      // console.log(1);
-      // console.log(customerComment,customerRating);
+      
       if(customerRating > 0 && customerComment.trim() !== ''){
-        // console.log(2);
       const response = await ticketService.updateTicket({'customer_rating':customerRating,'customer_comment':customerComment,'status':'Y'},Number(id));
       if(response.response == "Success"){
           GetTicket();
-          // console.log(3);
       }
     }
       } catch (error) {
@@ -179,17 +188,36 @@ const GetSolutions = async () => {
           key={solutions.length}
           records={solutions}
           columns={[
-            
+            {
+              accessor: 'action',
+              title: 'Actions',
+              sortable: false,
+              textAlign: 'center',
+              render: ({ solution_id }) => (
+                  <div className="flex gap-4 items-center w-max mx-auto">
+                    {changedData[Number(solution_id)] ? (
+                      <button 
+                      onClick={() => updateRow(Number(solution_id))}  
+                      className="text-green-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" />
+                        </svg>
+                        </button>
+                      ) : <span>--</span>}
+                  </div>
+              ),
+            },
             {
               accessor: "status",
               title: "Acceptance",
               render: (row) => (
                 <div className="flex space-x-2">
-                  {row.service_status=='C' && <>
+                  {(row.service_status=='C' && ticket.sr_status !== 'Z') && <>
                   <button
                     onClick={() => handleEditRow(row.solution_id, "customer_acceptance", true)}
                     className={`px-2 py-1 rounded ${
-                      row.customer_acceptance == true ? "bg-green-500 text-white" : "bg-gray-200"
+                      changedData[Number(row.solution_id)] ? (changedData[Number(row.solution_id)].customer_acceptance == true ? "bg-green-500 text-white" : "bg-gray-200") :
+                      (row.customer_acceptance == true ? "bg-green-500 text-white" : "bg-gray-200")
                     }`}
                   >
                 <svg
@@ -210,7 +238,8 @@ const GetSolutions = async () => {
                   <button
                     onClick={() => handleEditRow(row.solution_id, "customer_acceptance", false)}
                     className={`px-2 py-1 rounded ${
-                      row.customer_acceptance == false ? "bg-red-500 text-white" : "bg-gray-200"
+                      changedData[Number(row.solution_id)] ? (changedData[Number(row.solution_id)].customer_acceptance == false ? "bg-red-500 text-white" : "bg-gray-200") :
+                      (row.customer_acceptance == false ? "bg-red-500 text-white" : "bg-gray-200")
                     }`}
                   >
                     <svg
@@ -230,6 +259,47 @@ const GetSolutions = async () => {
                   </button>
                   </>
             }
+            {ticket.sr_status=='Z' && <>
+                  <button
+                    className={`px-2 py-1 rounded ${
+                      row.customer_acceptance == true ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                    }`}
+                  >
+                {row.customer_acceptance == true ? 
+                <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                      className="w-5 h-5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    :
+                    <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                    className="w-5 h-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                }
+               
+                  </button> </>
+            
+            }
                 </div>
               ),
             },
@@ -238,8 +308,9 @@ const GetSolutions = async () => {
                 title: "Feedback",
                 render: (row) => (
                   <textarea
-                    value={row.customer_feedback}
-                    onBlur={(e) => handleEditRow(row.solution_id, "customer_feedback", e.target.value)}
+                    value={changedData[Number(row.solution_id)] ? changedData[Number(row.solution_id)].customer_feedback  : row.customer_feedback}
+                    disabled={row.service_status !== 'C' || ticket.sr_status === 'Z'}
+                    onChange={(e) => handleEditRow(row.solution_id, "customer_feedback", e.target.value)}
                     className="form-input w-full bg-transparent border-0 focus:outline-none resize-none"
       onInput={(e) => {
         const target = e.target as HTMLTextAreaElement; 

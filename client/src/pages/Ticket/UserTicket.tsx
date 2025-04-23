@@ -3,6 +3,7 @@ import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useState, useEffect } from 'react';
 import { ticketService } from '../../services/ticketService';
 import { getPriorty,getStatus } from '../../utils/commonFunction';
+import { LoadingOverlay } from '@mantine/core';
 import sortBy from 'lodash/sortBy';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPageTitle } from '../../store/themeConfigSlice';
@@ -10,6 +11,7 @@ import { setPageTitle } from '../../store/themeConfigSlice';
 const UserTicket = () => {
     const dispatch = useDispatch();
     const [items, setItems] = useState<any[]>([]);
+    const [loader, setLoader] = useState(false);
     const navigate = useNavigate();
     const userAuthDetail = sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') as string) : null;
     const role = userAuthDetail?.role?userAuthDetail.role:'Manage';
@@ -21,11 +23,14 @@ const UserTicket = () => {
 
     const GetTickets = async () => {
         try {
+            setLoader(true);
             const response = await ticketService.getCustomerTickets();
             setItems(response.CustomerTickets);
             setInitialRecords(response.CustomerTickets);
-            console.log(response.CustomerTickets);
+            // console.log(response.CustomerTickets);
+            setLoader(false);
         } catch (error) {
+            setLoader(false);
             return ('Something Went Wrong');
         }
     }
@@ -92,13 +97,16 @@ const UserTicket = () => {
                             Create Ticket
                         </Link>
                     </div> */}
-                    <h3 className="flex text-xl w-full font-semibold justify-center">Tickets</h3>
+                    <h3 className="flex text-xl w-full font-semibold justify-center">Service Requests</h3>
                     <div className="ltr:ml-auto rtl:mr-auto">
                         <input type="text" className="form-input w-auto" placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
                     </div>
                 </div>
 
                 <div className="datatables pagination-padding">
+                    {loader &&
+                        <LoadingOverlay visible={loader} loaderProps={{ children: 'Loading...' }} />
+                    }
                     <DataTable
                         className="whitespace-nowrap table-hover"
                         withColumnBorders
@@ -110,7 +118,7 @@ const UserTicket = () => {
                                 accessor: 'action',
                                 title: 'Actions',
                                 sortable: false,
-                                textAlignment: 'center',
+                                textAlign: 'center',
                                 render: ({ sr_id }) => (
                                     <div className="flex gap-4 items-center w-max mx-auto">
                                          <NavLink to={`/src/solution/${sr_id}`} className="flex hover:text-info">

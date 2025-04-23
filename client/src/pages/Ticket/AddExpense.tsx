@@ -3,6 +3,7 @@ import { setPageTitle } from '../../store/themeConfigSlice';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate ,useParams} from 'react-router-dom';
 import { expenseService } from '../../services/expenseService';
+import { categoryService } from '../../services/categoryService';
 import { Button,LoadingOverlay } from "@mantine/core";
 import { showToast } from '../../utils/commonFunction';
 import Flatpickr from 'react-flatpickr';
@@ -11,7 +12,7 @@ import 'flatpickr/dist/flatpickr.css';
 
 interface FormData {
     sr_id:number | '',
-    expense_type:string,
+    expense_type:number | '',
     description:string,
     expense_date:Date,
     amount:number |'',
@@ -24,6 +25,7 @@ const AddExpense = () => {
     const fileInputRef = useRef(null);
     const now = new Date();
     const minDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+    const [category, setCategory] = useState<any[]>([]);
     const [formData, setFormData] = useState<FormData>({
         sr_id:Number(id),
         expense_type:'',
@@ -42,9 +44,19 @@ const AddExpense = () => {
         }
     }, [userAuthDetail])   
 
+    const GetCategory = async () => {
+        try {
+                const response = await categoryService.getCategories();
+                // console.log(response.CategoryList);
+                setCategory(response.CategoryList);
+        } catch (error) {
+            return ('Something Went Wrong');
+        }
+    }
+
     useEffect(() => {
         dispatch(setPageTitle('Add Expense'));
-        
+        GetCategory();
     },[]);
   
     const [loader, setLoader] = useState(false);
@@ -191,13 +203,13 @@ const AddExpense = () => {
                                     <label htmlFor="expense_type">Expense Type *</label>
                                     <select name="expense_type"
                                     value = {formData.expense_type}
-                                    onChange={(e) => {setFormData({ ...formData,expense_type: e.target.value });
+                                    onChange={(e) => {setFormData({ ...formData,expense_type: Number(e.target.value) });
                                 }}
                                         className={`form-select `}>
                                             <option value="">Choose Expense Type</option>
-                                            <option value="T">Travel Expense</option>
-                                            <option value="F">Food Expense</option>
-                                            <option value="P">Spare Part Expense</option>
+                                            { category.map((category) => 
+                                        <option key={category.category_id} value={category.category_id}>{category.name}</option>
+                                    )}
                                          
                                     </select>
                                 </div>
@@ -220,7 +232,7 @@ const AddExpense = () => {
                                         }}
                                     />
                                 </div>
-                                
+
                                 <div>
                <label className="block text-gray-700 font-medium">Description :</label>
                <textarea

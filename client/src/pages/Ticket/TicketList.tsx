@@ -2,11 +2,12 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useState, useEffect } from 'react';
 import { ticketService } from '../../services/ticketService';
+import { userService } from '../../services/userService';
 import { getServiceType,getPriorty,getStatus } from '../../utils/commonFunction';
 import sortBy from 'lodash/sortBy';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../store/themeConfigSlice';
-import { Button, MultiSelect, Stack } from '@mantine/core';
+import { Button, MultiSelect, Stack, ActionIcon, TextInput,LoadingOverlay } from '@mantine/core';
 import { DatePicker, type DatesRangeValue } from '@mantine/dates';
 
 import dayjs from 'dayjs';
@@ -14,6 +15,10 @@ import dayjs from 'dayjs';
 const TicketList = () => {
     const dispatch = useDispatch();
     const [items, setItems] = useState<any[]>([]);
+    const [customers, setCustomers] = useState([]);
+    const [employees, setEmployees] = useState([]);
+    const [loader, setLoader] = useState(false);
+    
     const navigate = useNavigate();
     const userAuthDetail = sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') as string) : null;
     const role = userAuthDetail?.role?userAuthDetail.role:'Manage';
@@ -21,21 +26,39 @@ const TicketList = () => {
         if(!userAuthDetail.token || role =='Manage'){
             navigate('/auth/login');
         }
-    }, [userAuthDetail])
+    }, [userAuthDetail]);
+
+    const GetUsers = async () => {
+        try {
+            const response = await userService.getAdmins();
+            const Customers = response.UserDetails.filter((user : any) => user.role === 'Customer').map((user: any) => user.username);
+            const Employees = response.UserDetails.filter((user : any) => user.role === 'Employee').map((user: any) => user.username);
+            setCustomers(Customers);
+            setEmployees(Employees);
+            // console.log(response.UserDetails);
+            // console.log(Customers);
+        } catch (error) {
+            return ('Something Went Wrong');
+        }
+    }
 
     const GetTickets = async () => {
                 try {
+                    setLoader(true);
                     const response = await ticketService.getTickets();
                     setItems(response.TicketDetails);
                     setInitialRecords(response.TicketDetails);
-                    console.log(response.TicketDetails);
+                    // console.log(response.TicketDetails);
+                    setLoader(false);
                 } catch (error) {
+                    setLoader(false);
                     return ('Something Went Wrong');
                 }
             }
 
             useEffect(() => {
                 dispatch(setPageTitle('Ticket List'));
+                GetUsers();
                 GetTickets();
             },[]);   
 
@@ -53,8 +76,13 @@ const TicketList = () => {
     });
     const [selectedPriority,setSelectedPriority] = useState<string[]>([]);
     const [selectedStatus,setSelectedStatus] = useState<string[]>([]);
+    const [selectedCustomer,setSelectedCustomer] = useState<string[]>([]);
+    const [selectedEmployee,setSelectedEmployee] = useState<string[]>([]);
     const [selectedServiceType,setSelectedServiceType] = useState<string[]>([]);
     const [srDateRange, setSRDateRange] = useState<DatesRangeValue>();
+    const [srQuery, setSRQuery] = useState('');
+    const [machineQuery, setMachineQuery] = useState('');
+    const [sr_idQuery, setSR_IDQuery] = useState('');
 
 
     useEffect(() => {
@@ -93,9 +121,21 @@ const TicketList = () => {
                 if (selectedStatus.length && !selectedStatus.some((d) => d === getStatus(ticket.sr_status || ''))) {
                     return false;
                 }
+                if (selectedCustomer.length && !selectedCustomer.some((d) => d === ticket.contact_person_name )) {
+                    return false;
+                }
+                if (selectedEmployee.length && !selectedEmployee.some((d) => d === ticket.assigned_to_name )) {
+                    return false;
+                }
                 if (selectedServiceType.length && !selectedServiceType.some((d) => d === getServiceType(ticket.service_type || ''))) {
                     return false;
                 }
+                if (srQuery !== '' && !ticket.sr_desc.toLowerCase().includes(srQuery.trim().toLowerCase()))
+                    return false;
+                if (machineQuery !== '' && !ticket.machine.toLowerCase().includes(machineQuery.trim().toLowerCase()))
+                    return false;
+                if (sr_idQuery !== '' && !ticket.sr_id.toString().includes(sr_idQuery.toString()))
+                    return false;
                 if (
                     srDateRange &&
                     srDateRange[0] &&
@@ -107,7 +147,7 @@ const TicketList = () => {
                 return true;
             })
         );
-    }, [selectedPriority,selectedServiceType,selectedStatus,srDateRange]);
+    }, [sr_idQuery,srQuery,machineQuery,selectedPriority,selectedCustomer,selectedEmployee,selectedServiceType,selectedStatus,srDateRange]);
 
     return (
         <div className="panel px-0 border-white-light dark:border-[#1b2e4b]">
@@ -130,6 +170,9 @@ const TicketList = () => {
                 </div>
 
                 <div className="datatables pagination-padding">
+                    {loader &&
+                            <LoadingOverlay visible={loader} loaderProps={{ children: 'Loading...' }} />
+                        }
                     <DataTable
                         className="whitespace-nowrap "
                         withColumnBorders
@@ -178,11 +221,43 @@ const TicketList = () => {
                                         <div>{sr_id}</div>
                                     </div>
                                 ),
+                                filter: (
+                                    <TextInput
+                                      label="SR ID"
+                                      description="Show ID's whose SR ID include the specified Number"
+                                      placeholder="Search SR ID's..."
+                                      leftSection={ <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>}
+                                      rightSection={
+                                        <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setSR_IDQuery('')}>
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                          <line x1="18" y1="6" x2="6" y2="18" />
+                                          <line x1="6" y1="6" x2="18" y2="18" />
+                                          </svg>
+                                        </ActionIcon>
+                                      }
+                                      value={sr_idQuery}
+                                      onChange={(e) => setSR_IDQuery(e.currentTarget.value)}
+                                    />
+                                  ),
+                                  filtering: sr_idQuery !== '',
                             },
                             {
                                 accessor: 'Date',
                                 title:'SR Date',
-                                sortable: true,
+                                sortable: false,
                                 render: ({ srf_date }) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{srf_date}</div>
@@ -214,30 +289,123 @@ const TicketList = () => {
                             {
                                 accessor: 'Requested By',
                                 title:'Requested By',
-                                sortable: true,
+                                sortable: false,
                                 render: ({ contact_person_name }) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{contact_person_name}</div>
                                     </div>
                                 ),
+                                filter: (
+                                    <MultiSelect
+                                        label="Filter by Customers"
+                                        placeholder="Select Customers..."
+                                        data={customers}
+                                        value={selectedCustomer}
+                                        onChange={setSelectedCustomer}
+                                        searchable
+                                        clearable
+                                        comboboxProps={{ withinPortal: false }}
+                                        leftSection={
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <circle cx="11" cy="11" r="8"></circle>
+                                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                            </svg>
+                                        }
+                                    />
+                                ),
+                                filtering: selectedCustomer.length > 0,
                             },
                             {
                                 accessor: 'Service Request',
-                                sortable: true,
+                                sortable: false,
                                 render: ({ sr_desc }) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{ sr_desc }</div>
                                     </div>
                                 ),
+                                filter: (
+                                    <TextInput
+                                      label="Service Request"
+                                      description="Show Service Request whose content include the specified text"
+                                      placeholder="Search Service Request..."
+                                      leftSection={ <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>}
+                                      rightSection={
+                                        <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setSRQuery('')}>
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                          <line x1="18" y1="6" x2="6" y2="18" />
+                                          <line x1="6" y1="6" x2="18" y2="18" />
+                                          </svg>
+                                        </ActionIcon>
+                                      }
+                                      value={srQuery}
+                                      onChange={(e) => setSRQuery(e.currentTarget.value)}
+                                    />
+                                  ),
+                                  filtering: srQuery !== '',
+                                
                             },
                             {
                                 accessor: 'Machine',
-                                sortable: true,
+                                sortable: false,
                                 render: ({ machine }) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{ machine }</div>
                                     </div>
                                 ),
+                                filter: (
+                                    <TextInput
+                                      label="Machine"
+                                      description="Show Machine whose name include the specified text"
+                                      placeholder="Search Machines..."
+                                      leftSection={ <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>}
+                                      rightSection={
+                                        <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMachineQuery('')}>
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                          <line x1="18" y1="6" x2="6" y2="18" />
+                                          <line x1="6" y1="6" x2="18" y2="18" />
+                                          </svg>
+                                        </ActionIcon>
+                                      }
+                                      value={machineQuery}
+                                      onChange={(e) => setMachineQuery(e.currentTarget.value)}
+                                    />
+                                  ),
+                                  filtering: machineQuery !== '',
                             },
                             {
                                 accessor: 'Priority',
@@ -316,7 +484,7 @@ const TicketList = () => {
                             
                             {
                                 accessor: 'Service Type',
-                                sortable: true,
+                                sortable: false,
                                 render: ({ service_type }) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{getServiceType(service_type)}</div>
@@ -359,10 +527,38 @@ const TicketList = () => {
                                         <div>{assigned_to_name?assigned_to_name:'Not Assigned'}</div>
                                     </div>
                                 ),
+                                filter: (
+                                    <MultiSelect
+                                        label="Filter by User"
+                                        placeholder="Select Users..."
+                                        data={employees}
+                                        value={selectedEmployee}
+                                        onChange={setSelectedEmployee}
+                                        searchable
+                                        clearable
+                                        comboboxProps={{ withinPortal: false }}
+                                        leftSection={
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <circle cx="11" cy="11" r="8"></circle>
+                                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                            </svg>
+                                        }
+                                    />
+                                ),
+                                filtering: selectedEmployee.length > 0,
                             },
                             {
                                 accessor: 'Rating',
-                                sortable: true,
+                                sortable: false,
                                 render: ({ customer_rating }) => (
                                     <div className="flex items-center justify-center font-semibold">
                                         <div>{customer_rating}</div>

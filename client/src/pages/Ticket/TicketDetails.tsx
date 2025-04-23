@@ -21,7 +21,7 @@ interface SolutionData {
   status_remark: string,
   responsibility: number | '',
   status_date:Date | '',
-  customer_acceptance:Boolean,
+  customer_acceptance:Boolean | '',
   customer_feedback:string,
 }
 const TicketDetails = () => {
@@ -146,18 +146,15 @@ useEffect(() => {
           }
         }
       };
-    
-      // handleNavigation(); // Runs before route changes
       return () => {handleNavigation();};
     }, [location.pathname, navigate]);
 
     useEffect(() => {
       const changed = isRowsChanged();
-      // console.log("State Updated - Changes Detected:", changed); // ✅ Now logs when state updates
       setHasUnsavedChanges(changed);
     }, [tableData]);
 
-// ✅ Function to check if any row has changed
+//  Function to check if any row has changed
 const isRowsChanged = (): boolean => {
   return tableData.some((row) => {
     const originalRow = solutions.find((solution) => solution.solution_id === row.solution_id);
@@ -199,7 +196,7 @@ const handleUpdateRow = async () => {
 
   const updatedData = JSON.parse(savedData);
   const solutionData = JSON.parse(savedSolution);
-  setTableData(updatedData); // Update state, but don’t await it
+  setTableData(updatedData); 
   setSolutions(solutionData);
   console.log("Table Data before updating:", updatedData);
 
@@ -273,7 +270,7 @@ const handleUpdateRow = async () => {
             status_remark: "",  
             responsibility: '',
             status_date: '', 
-            customer_acceptance: false, 
+            customer_acceptance: '', 
             customer_feedback: "",
         }
         ]);
@@ -419,6 +416,7 @@ const handleRowChange = (id:any, field: string, value: any,index: number) => {
   };
 
   const handleDeleteRow = async (row:any,rowIndex:number) => {
+    if (window.confirm('Are you sure want to delete selected row ?')) {
     try {
       setLoading(true);
       console.log(rowIndex);
@@ -437,6 +435,7 @@ const handleRowChange = (id:any, field: string, value: any,index: number) => {
   } finally{
     setLoading(false);
   }
+}
   };
 
   const handlePreview = (attachment: any) => {

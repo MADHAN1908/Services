@@ -3,7 +3,7 @@ import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useState, useEffect } from 'react';
 import { expenseService } from '../../services/expenseService';
 import { ticketService } from '../../services/ticketService';
-import { getExpenseType } from '../../utils/commonFunction';
+import { LoadingOverlay } from '@mantine/core';
 import sortBy from 'lodash/sortBy';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../store/themeConfigSlice';
@@ -13,6 +13,7 @@ const TicketExpenses = () => {
     const dispatch = useDispatch();
     const [items, setItems] = useState<any[]>([]);
     const [ticket,setTicket] = useState<any>({});
+    const [loader, setLoader] = useState(false);
     const { id  } =useParams();
 
     const navigate = useNavigate();
@@ -29,19 +30,25 @@ const TicketExpenses = () => {
     }, [userAuthDetail]);
     const GetTicket = async () => {
               try {
+                setLoader(true);
                   const response = await ticketService.getTicket(Number(id));
                   setTicket(response.TicketDetails);
+                setLoader(false);
               } catch (error) {
+                setLoader(false);
                   return ('Something Went Wrong');
               }
           }
 
      const GetTicketExpenses = async () => {
             try {
+                setLoader(true);
                 const response = await expenseService.getExpenses(id);
                 setItems(response.Expenses);
                 setInitialRecords(response.Expenses);
+                setLoader(false);
                 } catch (error) {
+                    setLoader(false);
                 return ('Something Went Wrong');
             }
         }
@@ -52,17 +59,22 @@ const TicketExpenses = () => {
             GetTicketExpenses();
         },[]); 
 
-        const handleDeleteRow = async (sr_id : any ) => {
+        const handleDeleteRow = async (expense_id : any ) => {
+            if (window.confirm('Are you sure want to delete selected row ?')) {
             try {
-              if(sr_id){
-              const response = await expenseService.deleteExpense(sr_id);
+                setLoader(true);
+              if(expense_id){
+              const response = await expenseService.deleteExpense(expense_id);
               if(response.response == "Success"){
                 GetTicketExpenses();
               }
             }
+            setLoader(false);
             } catch (error) {
+                setLoader(false);
               return ('Something Went Wrong');
           } 
+        }
           };
         
           const handlePreview = (attachment: any) => {
@@ -130,6 +142,9 @@ const TicketExpenses = () => {
           </div>
         </div>
       )}
+       {loader &&
+            <LoadingOverlay visible={loader} loaderProps={{ children: 'Loading...' }} />
+        }
                     <DataTable
                         className="whitespace-nowrap table-hover"
                         withColumnBorders
@@ -143,9 +158,9 @@ const TicketExpenses = () => {
                                 title: 'Actions',
                                 sortable: false,
                                 textAlign: 'center',
-                                render: ({ sr_id }) => (
+                                render: ({ expense_id }) => (
                                     <div className="flex gap-4 items-center w-max mx-auto">
-                                        <button type="button" disabled={ticket.sr_status === "Z"}  className="flex hover:text-danger" onClick={(e) => handleDeleteRow(sr_id)}>
+                                        <button type="button" disabled={ticket.sr_status === "Z"}  className="flex hover:text-danger" onClick={(e) => handleDeleteRow(expense_id)}>
                                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5">
                                                 <path d="M20.5001 6H3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"></path>
                                                 <path
@@ -171,7 +186,7 @@ const TicketExpenses = () => {
                                 accessor: 'expenses_id',
                                 title:'Expenses Type',
                                 sortable: true,
-                                render: ({ expense_type }) => <div className="flex  justify-center font-semibold">{getExpenseType(expense_type)}</div>,
+                                render: ({ category_name }) => <div className="flex  justify-center font-semibold">{category_name}</div>,
                             },
                             {
                                 accessor: 'expenses_date',

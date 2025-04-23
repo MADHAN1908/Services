@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { ticketService } from '../../services/ticketService';
 import { getPriorty,getStatus } from '../../utils/commonFunction';
 import sortBy from 'lodash/sortBy';
-import { Button, MultiSelect, Stack } from '@mantine/core';
+import { Button, MultiSelect, Stack, LoadingOverlay } from '@mantine/core';
 import { DatePicker, type DatesRangeValue } from '@mantine/dates';
 import dayjs from 'dayjs';
 import { useDispatch } from 'react-redux';
@@ -16,6 +16,7 @@ import { title } from 'process';
 const AssignedTicket = () => {
     const dispatch = useDispatch();
     const [items, setItems] = useState<any[]>([]);
+    const [loader, setLoader] = useState(false);
 
     const navigate = useNavigate();
     const userAuthDetail = sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') as string) : null;
@@ -29,10 +30,13 @@ const AssignedTicket = () => {
 
      const GetTickets = async () => {
             try {
+                setLoader(true);
                 const response = await ticketService.getAssignedTickets();
                 setItems(response.AssignedTickets);
                 setInitialRecords(response.AssignedTickets);
+                setLoader(false);
                 } catch (error) {
+                setLoader(false);
                 return ('Something Went Wrong');
             }
         }
@@ -51,12 +55,14 @@ const AssignedTicket = () => {
 
         const handleCloseSR = async (id:number) => {
             try {
+                setLoader(true);
                 const response = await ticketService.updateTicket({'status' : 'Z'},id);
                 if(response.response == "Success"){
                     GetTickets();
                 }
-                
+                setLoader(false);
                 } catch (error) {
+                    setLoader(false);
                 return ('Something Went Wrong');
             }
         }
@@ -147,6 +153,9 @@ const AssignedTicket = () => {
                 </div>
 
                 <div className="datatables pagination-padding">
+                    {loader &&
+                        <LoadingOverlay visible={loader} loaderProps={{ children: 'Loading...' }} />
+                    }
                     <DataTable
                         className="whitespace-nowrap table-hover"
                         withColumnBorders

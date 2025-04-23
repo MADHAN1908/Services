@@ -2,13 +2,11 @@
 import React, { useState,useEffect,useRef } from "react";
 import { useNavigate,useParams,useLocation,NavLink,unstable_Blocker as useBlocker } from "react-router-dom";
 import { DataTable } from 'mantine-datatable';
-import { Button,Loader,LoadingOverlay } from "@mantine/core";
+import { LoadingOverlay } from "@mantine/core";
 import { ticketService } from "../../services/ticketService";
 import { solutionService } from "../../services/solutionService";
-import { userService } from "../../services/userService";
-import { getPriorty,getStatus,showToast } from '../../utils/commonFunction';
-import Flatpickr from 'react-flatpickr';
-import 'flatpickr/dist/themes/material_blue.css';
+import { getStatus } from '../../utils/commonFunction';
+
 
 interface SolutionData {
   solution_id:number | '',
@@ -25,8 +23,6 @@ interface SolutionData {
   customer_feedback:string,
 }
 const ViewTicketDetails = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const { id  } =useParams();
   const [ticket,setTicket] = useState<any>({});
   const [solutions,setSolutions] = useState<SolutionData[]>([]);

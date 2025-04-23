@@ -2,12 +2,17 @@ import {POST_CALL_AUTH , GET_CALL_AUTH ,UPDATE_CALL_AUTH ,DELETE_CALL_AUTH,UPLOA
 
 export const expenseService = {
   getExpenses,
+  getAllExpenses,
   createExpense,
   deleteExpense,
 };
 
 function getExpenses(id:number) {
   return GET_CALL_AUTH("/expenses/"+id);
+}
+
+function getAllExpenses() {
+  return GET_CALL_AUTH("/expenses/all/");
 }
 
 function createExpense(data: any) {

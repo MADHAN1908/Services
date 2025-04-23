@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { ticketService } from '../../services/ticketService';
 import { userService } from '../../services/userService';
 import { getPriorty,getStatus } from '../../utils/commonFunction';
-import { Button, MultiSelect, Stack } from '@mantine/core';
+import { Button, MultiSelect, Stack, LoadingOverlay } from '@mantine/core';
 import { DatePicker, type DatesRangeValue } from '@mantine/dates';
 import dayjs from 'dayjs';
 import sortBy from 'lodash/sortBy';
@@ -14,6 +14,7 @@ import { setPageTitle } from '../../store/themeConfigSlice';
 const AssignTicket = () => {
     const dispatch = useDispatch();
     const [items, setItems] = useState<any[]>([]);
+    const [loader, setLoader] = useState(false);
     const [users, setUsers] = useState<any[]>([]);
     const [selectedPriority,setSelectedPriority] = useState<string[]>([]);
     const [selectedStatus,setSelectedStatus] = useState<string[]>([]);
@@ -30,11 +31,14 @@ const AssignTicket = () => {
 
     const GetTickets = async () => {
         try {
+            setLoader(true);
             const response = await ticketService.getAssignTickets();
             setItems(response.AssignTickets);
             setInitialRecords(response.AssignTickets);
+            setLoader(false);
             // console.log(response.AssignTickets);
             } catch (error) {
+                setLoader(false);
             return ('Something Went Wrong');
         }
     }
@@ -66,6 +70,7 @@ const AssignTicket = () => {
     
     const handleUpdateRows = async () => {
         try {
+            setLoader(true);
             await Promise.all(
                 changedRows.map(async (row) => {
                     await ticketService.updateTicket({ assign: row.assign, status: "P" }, row.sr_id);
@@ -73,20 +78,24 @@ const AssignTicket = () => {
             );
             setChangedRows([]); // Clear updated rows after successful update
             GetTickets(); // Refresh table data
+            setLoader(false);
         } catch (error) {
+            setLoader(false);
             console.error("Something Went Wrong:", error);
         }
     };
 
     const handleAssign = async (id:number,assign:number) => {
         try {
+            setLoader(true);
             const response = await ticketService.updateTicket({assign,status:'P'},id);
             if(response.response == "Success"){
                 setChangedRows((prev) => prev.filter(row => row.sr_id !== id)); 
             }
-            
+            setLoader(false);
             } catch (error) {
-            return ('Something Went Wrong');
+                setLoader(false);
+                return ('Something Went Wrong');
         }
     }
     
@@ -175,6 +184,9 @@ const AssignTicket = () => {
                 </div>
 
                 <div className="datatables pagination-padding">
+                    {loader &&
+                        <LoadingOverlay visible={loader} loaderProps={{ children: 'Loading...' }} />
+                    }
                     <DataTable
                         className="whitespace-nowrap table-hover"
                         withColumnBorders

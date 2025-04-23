@@ -127,6 +127,40 @@ const Sidebar = () => {
                                 </NavLink>
                             </li>
                             </>}
+                            {role === "Admin" &&
+                        <li className="menu nav-item">
+                            <button type="button" className={`${currentMenu === 'category' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('category')}>
+                                <div className="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <rect x="3" y="4" width="18" height="16" rx="2" ry="2" stroke="gray" stroke-width="2" fill="none"/>
+  <path d="M3 8h18" stroke="gray" stroke-width="2"/>
+  <circle cx="7" cy="12" r="1.5" fill="gray"/>
+  <circle cx="12" cy="12" r="1.5" fill="gray"/>
+  <circle cx="17" cy="12" r="1.5" fill="gray"/>
+</svg>
+
+                                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Category')}</span>
+                                </div>
+
+                                <div className={currentMenu === 'category' ? 'rotate-90' : 'rtl:rotate-180'}>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9 5L15 12L9 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </div>
+                            </button>
+
+                            <AnimateHeight duration={300} height={currentMenu === 'category' ? 'auto' : 0}>
+                                <ul className="sub-menu text-gray-500">
+                                { (role=='Admin' ) &&
+                                    <li><NavLink to="/category/add" onClick={() => dispatch(toggleSidebar())}>{t('Add')}</NavLink></li>
+                                    }
+                                { (role=='Admin' ) &&
+                                    <li><NavLink to="/category"  onClick={() => dispatch(toggleSidebar())}>{t('List')}</NavLink></li>
+                                }
+                                </ul>
+                            </AnimateHeight>
+                        </li>
+}
                             <li className="menu nav-item">
                             <button type="button" className={`${currentMenu === 'service_request' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('contacts')}>
                                 <div className="flex items-center">
@@ -176,10 +210,10 @@ const Sidebar = () => {
                                 }
                                 { (role=='Admin'|| role=='Manager' || role=='Employee' ) && <>
                                     <li><NavLink to="/sr/assigned" onClick={() => dispatch(toggleSidebar())}>{t('Close')}</NavLink></li>
-                                    <li><NavLink to="/sr/list" onClick={() => dispatch(toggleSidebar())}>{t('View')}</NavLink></li>
+                                    <li><NavLink to="/sr/list" onClick={() => dispatch(toggleSidebar())}>{t('View SR')}</NavLink></li>
                                     </>}
-                                    { (role=='Admin') && <>
-                                    {/* <li><NavLink to="/sr/close" onClick={() => dispatch(toggleSidebar())}>{t('ClosureSample')}</NavLink></li> */}
+                                    { (role=='Admin' || role=='Manager' || role=='Employee' ) && <>
+                                    <li><NavLink to="/sr/expenses/list" onClick={() => dispatch(toggleSidebar())}>{t('View Expense')}</NavLink></li>
                                     </>}
                                 { (role=='Customer') && <>
                                     <li><NavLink to="/src" onClick={() => dispatch(toggleSidebar())}>{t('View')}</NavLink></li>

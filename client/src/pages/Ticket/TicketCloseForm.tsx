@@ -118,7 +118,7 @@ const TicketCloseForm = () => {
             MOC:'',
             sr_desc: '',
             sr_id:'',
-            sr_status: 'C',
+            sr_status: 'I',
             machine: '',
             priority: '',
             service_type: '',
@@ -498,11 +498,11 @@ const TicketCloseForm = () => {
             try{
               setLoader(true);
                 if(customerRating >0 && customerComment.trim() !== ''){
-                    const response = await ticketService.updateTicket({'customer_rating':customerRating,'customer_comment':customerComment,'status':'Y'},Number(formData.sr_id));
+                    const response = await ticketService.updateTicket({'customer_rating':customerRating,'customer_comment':customerComment,'status':'C'},Number(formData.sr_id));
                     if(response.response == "Success"){
-                        console.log(response.ticket);
-                        console.log(response.ticket[0].customer_rating);
-                        console.log(response.ticket[0].customer_comment);
+                        // console.log(response.ticket);
+                        // console.log(response.ticket[0].customer_rating);
+                        // console.log(response.ticket[0].customer_comment);
                          setCustomerRating(Number(response.ticket[0].customer_rating));
                          setCustomerComment(response.ticket[0].customer_comment);
                      }

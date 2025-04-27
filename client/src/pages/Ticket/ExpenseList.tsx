@@ -6,7 +6,7 @@ import { categoryService } from '../../services/categoryService';
 import sortBy from 'lodash/sortBy';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../store/themeConfigSlice';
-import { Button, MultiSelect, Stack, ActionIcon,TextInput,LoadingOverlay } from '@mantine/core';
+import { Button, MultiSelect, Stack, ActionIcon,TextInput,LoadingOverlay , Box, NumberInput } from '@mantine/core';
 import { DatePicker, type DatesRangeValue } from '@mantine/dates';
 import dayjs from 'dayjs';
 
@@ -15,6 +15,12 @@ const ExpenseList = () => {
     const [items, setItems] = useState<any[]>([]);
     const [category, setCategory] = useState([]);
     const [loader, setLoader] = useState(false);
+    const [minSR_ID, setMinSR_ID] = useState<number | null>(null);
+    const [maxSR_ID, setMaxSR_ID] = useState<number | null>(null);
+    const [minExpense_id, setMinExpense_id] = useState<number | null>(null);
+    const [maxExpense_id, setMaxExpense_id] = useState<number | null>(null);
+    const [minAmount, setMinAmount] = useState<number | null>(null);
+    const [maxAmount, setMaxAmount] = useState<number | null>(null);
     const navigate = useNavigate();
     const userAuthDetail = sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') as string) : null;
     const role = userAuthDetail?.role?userAuthDetail.role:'Manage';
@@ -135,11 +141,17 @@ const ExpenseList = () => {
                         return false;
                 if (amountQuery !== '' && !expense.amount.toString().includes(amountQuery.toString()))
                     return false;
+                if (minSR_ID !== null && maxSR_ID !== '' && expense.sr_id < minSR_ID) return false;
+                if (maxSR_ID !== null && maxSR_ID !== '' && expense.sr_id > maxSR_ID) return false;
+                if (minExpense_id !== null && maxExpense_id !== '' && expense.expense_id < minExpense_id) return false;
+                if (maxExpense_id !== null && maxExpense_id !== '' && expense.expense_id > maxExpense_id) return false;
+                if (minAmount !== null && maxAmount  !== '' && expense.amount < minAmount ) return false;
+                if (maxAmount  !== null && maxAmount  !== '' && expense.amount > maxAmount ) return false;
                 
                 return true;
             })
         );
-    }, [expense_idQuery, sr_idQuery,descriptionQuery,amountQuery,selectedExpenseType,expenseDateRange]);
+    }, [expense_idQuery, sr_idQuery,descriptionQuery,amountQuery,selectedExpenseType,expenseDateRange,minSR_ID,maxSR_ID,minExpense_id,maxExpense_id,minAmount,maxAmount]);
 
     return (
         <div className="panel px-0 border-white-light dark:border-[#1b2e4b]">
@@ -194,6 +206,7 @@ const ExpenseList = () => {
                                     </div>
                                 ),
                                 filter: (
+                                  <Box>
                                     <TextInput
                                       label="Expense ID"
                                       description="Show ID's whose Expense ID include the specified Number"
@@ -223,8 +236,75 @@ const ExpenseList = () => {
                                       value={expense_idQuery}
                                       onChange={(e) => setExpense_idQuery(e.currentTarget.value)}
                                     />
+                                    <Box mt={4} sx={{ display: 'flex', gap: 4 }}>
+                                      <NumberInput
+                                        size="xs"
+                                        placeholder="Min"
+                                        leftSection={ <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          >
+                                            <polyline points="6 9 12 15 18 9" />
+                                          </svg>}
+                                        rightSection={
+                                            <Box mr={12}>
+                                            <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMinExpense_id('')}>
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                              <line x1="18" y1="6" x2="6" y2="18" />
+                                              <line x1="6" y1="6" x2="18" y2="18" />
+                                              </svg>
+                                            </ActionIcon>
+                                            </Box>
+                                          }
+                                        value={minExpense_id}
+                                        onChange={setMinExpense_id}
+                                        style={{ flex: 1  }}
+                                        // styles={{ input: { width: 60 } }}
+                                      />
+                                      </Box>
+                                      <Box mt={4} sx={{ display: 'flex', gap: 4 }}>
+                                      <NumberInput
+                                        size="xs"
+                                        placeholder="Max"
+                                        leftSection={ <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          >
+                                            <polyline points="6 15 12 9 18 15" />
+                                          </svg>}
+                                        rightSection={
+                                            <Box mr={12}>
+                                            <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMaxExpense_id('')}>
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                              <line x1="18" y1="6" x2="6" y2="18" />
+                                              <line x1="6" y1="6" x2="18" y2="18" />
+                                              </svg>
+                                            </ActionIcon>
+                                            </Box>
+                                          }
+                                        value={maxExpense_id}
+                                        onChange={setMaxExpense_id}
+                                        style={{ flex: 1 }}
+                                        // styles={{ input: { width: 60 } }}
+                                      />
+                                    </Box>
+                                  </Box>
                                   ),
-                                  filtering: expense_idQuery !== '',
+                                  filtering: expense_idQuery !== '' || (minExpense_id !== '' && minExpense_id !== null) || (maxExpense_id !== '' && maxExpense_id !== null),
                             },
                             {
                                 accessor: 'SR ID',
@@ -236,6 +316,7 @@ const ExpenseList = () => {
                                     </div>
                                 ),
                                 filter: (
+                                  <Box>
                                     <TextInput
                                       label="SR ID"
                                       description="Show ID's whose SR ID include the specified Number"
@@ -265,8 +346,75 @@ const ExpenseList = () => {
                                       value={sr_idQuery}
                                       onChange={(e) => setSR_IDQuery(e.currentTarget.value)}
                                     />
+                                    <Box mt={4} sx={{ display: 'flex', gap: 4 }}>
+                                      <NumberInput
+                                        size="xs"
+                                        placeholder="Min"
+                                        leftSection={ <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          >
+                                            <polyline points="6 9 12 15 18 9" />
+                                          </svg>}
+                                        rightSection={
+                                            <Box mr={12}>
+                                            <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMinSR_ID('')}>
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                              <line x1="18" y1="6" x2="6" y2="18" />
+                                              <line x1="6" y1="6" x2="18" y2="18" />
+                                              </svg>
+                                            </ActionIcon>
+                                            </Box>
+                                          }
+                                        value={minSR_ID}
+                                        onChange={setMinSR_ID}
+                                        style={{ flex: 1  }}
+                                        // styles={{ input: { width: 60 } }}
+                                      />
+                                      </Box>
+                                      <Box mt={4} sx={{ display: 'flex', gap: 4 }}>
+                                      <NumberInput
+                                        size="xs"
+                                        placeholder="Max"
+                                        leftSection={ <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          >
+                                            <polyline points="6 15 12 9 18 15" />
+                                          </svg>}
+                                        rightSection={
+                                            <Box mr={12}>
+                                            <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMaxSR_ID('')}>
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                              <line x1="18" y1="6" x2="6" y2="18" />
+                                              <line x1="6" y1="6" x2="18" y2="18" />
+                                              </svg>
+                                            </ActionIcon>
+                                            </Box>
+                                          }
+                                        value={maxSR_ID}
+                                        onChange={setMaxSR_ID}
+                                        style={{ flex: 1 }}
+                                        // styles={{ input: { width: 60 } }}
+                                      />
+                                    </Box>
+                                  </Box>
                                   ),
-                                  filtering: sr_idQuery !== '',
+                                  filtering: sr_idQuery !== '' || (minSR_ID !== '' && minSR_ID !== null) || (maxSR_ID !== '' && maxSR_ID !== null),
                             },
                             {
                                 accessor: 'expenses_type',
@@ -381,7 +529,7 @@ const ExpenseList = () => {
                                 title: 'Amount',
                                 // sortable: true,
                                 render: ({ amount }) => <div className="font-semibold">{amount}</div>,
-                                filter: (
+                                filter: (<Box>
                                     <TextInput
                                       label="Amount"
                                       description="Show Amounts which Amount include the specified Number"
@@ -411,8 +559,75 @@ const ExpenseList = () => {
                                       value={amountQuery}
                                       onChange={(e) => setAmountQuery(e.currentTarget.value)}
                                     />
+                                    <Box mt={4} sx={{ display: 'flex', gap: 4 }}>
+                                      <NumberInput
+                                        size="xs"
+                                        placeholder="Min"
+                                        leftSection={ <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          >
+                                            <polyline points="6 9 12 15 18 9" />
+                                          </svg>}
+                                        rightSection={
+                                            <Box mr={12}>
+                                            <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMinAmount('')}>
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                              <line x1="18" y1="6" x2="6" y2="18" />
+                                              <line x1="6" y1="6" x2="18" y2="18" />
+                                              </svg>
+                                            </ActionIcon>
+                                            </Box>
+                                          }
+                                        value={minAmount}
+                                        onChange={setMinAmount}
+                                        style={{ flex: 1  }}
+                                        // styles={{ input: { width: 60 } }}
+                                      />
+                                      </Box>
+                                      <Box mt={4} sx={{ display: 'flex', gap: 4 }}>
+                                      <NumberInput
+                                        size="xs"
+                                        placeholder="Max"
+                                        leftSection={ <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          >
+                                            <polyline points="6 15 12 9 18 15" />
+                                          </svg>}
+                                        rightSection={
+                                            <Box mr={12}>
+                                            <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMaxAmount('')}>
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                              <line x1="18" y1="6" x2="6" y2="18" />
+                                              <line x1="6" y1="6" x2="18" y2="18" />
+                                              </svg>
+                                            </ActionIcon>
+                                            </Box>
+                                          }
+                                        value={maxAmount}
+                                        onChange={setMaxAmount}
+                                        style={{ flex: 1 }}
+                                        // styles={{ input: { width: 60 } }}
+                                      />
+                                    </Box>
+                                  </Box>
                                   ),
-                                  filtering: amountQuery !== '',
+                                  filtering: amountQuery !== '' || (minAmount !== '' && minAmount !== null) || (maxAmount !== '' && maxAmount !== null),
                             },
                             {
                                 accessor: 'Attachments',

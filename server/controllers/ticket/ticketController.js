@@ -1,5 +1,6 @@
 
 const ticketModel = require('../../model/ticketModel');
+const reportController = require('./reportController')
 
 const createTicket = async (req, res) => {
  const user = req.user;
@@ -180,9 +181,19 @@ const updateTicket = async (req, res) => {
     if(req.body.customer_comment)
         UpdateArray.customer_comment = req.body.customer_comment;
 
-        const updateTicket = await ticketModel.updateTicket( UpdateArray, id);
+    const updateTicket = await ticketModel.updateTicket( UpdateArray, id);
+    
         if (updateTicket){
+            if(UpdateArray.sr_status == 'C'){
+               const response = await reportController.getMailReport(id);
+               if(response == 'Success'){
+                return res.status(200).json({ 'response': 'Success','ticket':updateTicket });
+               }else{
+                return res.status(400).json({ 'response': 'Failed', "message": 'Error in Mail Sending' });
+               }
+            }else{
             return res.status(200).json({ 'response': 'Success','ticket':updateTicket });
+            }
     }
     else {
         return res.status(400).json({ 'response': 'Failed', "message": 'Not found' });

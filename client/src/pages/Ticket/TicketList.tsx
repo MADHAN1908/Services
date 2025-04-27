@@ -7,7 +7,7 @@ import { getServiceType,getPriorty,getStatus } from '../../utils/commonFunction'
 import sortBy from 'lodash/sortBy';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../store/themeConfigSlice';
-import { Button, MultiSelect, Stack, ActionIcon, TextInput,LoadingOverlay } from '@mantine/core';
+import { Button, MultiSelect, Stack, ActionIcon, TextInput,LoadingOverlay, NumberInput,Box,Checkbox,Text } from '@mantine/core';
 import { DatePicker, type DatesRangeValue } from '@mantine/dates';
 
 import dayjs from 'dayjs';
@@ -18,6 +18,23 @@ const TicketList = () => {
     const [customers, setCustomers] = useState([]);
     const [employees, setEmployees] = useState([]);
     const [loader, setLoader] = useState(false);
+    const [minSR_ID, setMinSR_ID] = useState<number | null>(null);
+    const [maxSR_ID, setMaxSR_ID] = useState<number | null>(null);
+
+    const [visibleColumns, setVisibleColumns] = useState({
+        sr_id: true,
+        sr_date: true,
+        requested_by:true,
+        service_request:true,
+        machine : true,
+        priority: true,
+        status: true,
+        service_type: true,
+        assigned_to : true,
+        assigned_by : false,
+        rating : true,
+        
+      });
     
     const navigate = useNavigate();
     const userAuthDetail = sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') as string) : null;
@@ -136,6 +153,8 @@ const TicketList = () => {
                     return false;
                 if (sr_idQuery !== '' && !ticket.sr_id.toString().includes(sr_idQuery.toString()))
                     return false;
+                if (minSR_ID !== null && minSR_ID !== '' && ticket.sr_id < minSR_ID) return false;
+                if (maxSR_ID !== null && maxSR_ID !== '' && ticket.sr_id > maxSR_ID) return false;
                 if (
                     srDateRange &&
                     srDateRange[0] &&
@@ -147,7 +166,8 @@ const TicketList = () => {
                 return true;
             })
         );
-    }, [sr_idQuery,srQuery,machineQuery,selectedPriority,selectedCustomer,selectedEmployee,selectedServiceType,selectedStatus,srDateRange]);
+    }, [sr_idQuery,srQuery,machineQuery,selectedPriority,selectedCustomer,selectedEmployee,selectedServiceType,selectedStatus,srDateRange,minSR_ID,maxSR_ID]);
+
 
     return (
         <div className="panel px-0 border-white-light dark:border-[#1b2e4b]">
@@ -177,13 +197,14 @@ const TicketList = () => {
                         className="whitespace-nowrap "
                         withColumnBorders
                         withTableBorder
-                        pinFirstColumn
+                        // pinFirstColumn
                         // noHeader
                         // height={450}
                         // borderColor="#d0d4da"
                         // rowBorderColor="#d0d4da"
                         records={records}
-                        columns={[
+                        columns={
+                            [
                             {
                                 accessor: 'action',
                                 title: 'Actions',
@@ -211,17 +232,39 @@ const TicketList = () => {
         </NavLink>
                                     </div>
                                 ),
+                                filter :(<Box mb={16}>
+                                    <Text fw={700} mb={8}>Visible Columns</Text>
+                                  
+                                    {Object.keys(visibleColumns).map((columnKey) => (<div className="flex">
+                                      <Checkbox
+                                        key={columnKey}
+                                        className="flex-1"
+                                        // label={<Text fw={600}>{columnKey.toUpperCase()}</Text>}
+                                        // label={columnKey.toUpperCase()}
+                                        checked={visibleColumns[columnKey]}
+                                        onChange={(e) =>
+                                          setVisibleColumns({
+                                            ...visibleColumns,
+                                            [columnKey]: e.currentTarget.checked,
+                                          })
+                                        }
+                                        mb={8}
+                                      />
+                                    <Text className="flex-2">{columnKey.toUpperCase()}</Text></div>
+                                    ))}
+                                  </Box>),
+                                  filtering: true,
                             },
-                            {
+                           visibleColumns.sr_id && {
                                 accessor: 'ticketID',
-                                title:"SR ID",
+                                title:'SR ID',
                                 sortable: true,
                                 render: ({ sr_id }) => (
                                     <div className="flex items-center justify-center font-semibold">
                                         <div>{sr_id}</div>
                                     </div>
                                 ),
-                                filter: (
+                                filter: (<Box>
                                     <TextInput
                                       label="SR ID"
                                       description="Show ID's whose SR ID include the specified Number"
@@ -251,10 +294,77 @@ const TicketList = () => {
                                       value={sr_idQuery}
                                       onChange={(e) => setSR_IDQuery(e.currentTarget.value)}
                                     />
+                                    <Box mt={4} sx={{ display: 'flex', gap: 4 }}>
+                                      <NumberInput
+                                        size="xs"
+                                        placeholder="Min"
+                                        leftSection={ <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          >
+                                            <polyline points="6 9 12 15 18 9" />
+                                          </svg>}
+                                        rightSection={
+                                            <Box mr={12}>
+                                            <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMinSR_ID('')}>
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                              <line x1="18" y1="6" x2="6" y2="18" />
+                                              <line x1="6" y1="6" x2="18" y2="18" />
+                                              </svg>
+                                            </ActionIcon>
+                                            </Box>
+                                          }
+                                        value={minSR_ID}
+                                        onChange={setMinSR_ID}
+                                        style={{ flex: 1  }}
+                                        // styles={{ input: { width: 60 } }}
+                                      />
+                                      </Box>
+                                      <Box mt={4} sx={{ display: 'flex', gap: 4 }}>
+                                      <NumberInput
+                                        size="xs"
+                                        placeholder="Max"
+                                        leftSection={ <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          >
+                                            <polyline points="6 15 12 9 18 15" />
+                                          </svg>}
+                                        rightSection={
+                                            <Box mr={12}>
+                                            <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMaxSR_ID('')}>
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                              <line x1="18" y1="6" x2="6" y2="18" />
+                                              <line x1="6" y1="6" x2="18" y2="18" />
+                                              </svg>
+                                            </ActionIcon>
+                                            </Box>
+                                          }
+                                        value={maxSR_ID}
+                                        onChange={setMaxSR_ID}
+                                        style={{ flex: 1 }}
+                                        // styles={{ input: { width: 60 } }}
+                                      />
+                                    </Box>
+                                  </Box>
                                   ),
-                                  filtering: sr_idQuery !== '',
+                                  filtering: sr_idQuery !== '' || (minSR_ID !== '' && minSR_ID !== null) || (maxSR_ID !== '' && maxSR_ID !== null),
                             },
-                            {
+                           visibleColumns.sr_date && {
                                 accessor: 'Date',
                                 title:'SR Date',
                                 sortable: false,
@@ -286,7 +396,7 @@ const TicketList = () => {
                                   ),
                                   filtering: Boolean(srDateRange),
                             },
-                            {
+                           visibleColumns.requested_by && {
                                 accessor: 'Requested By',
                                 title:'Requested By',
                                 sortable: false,
@@ -324,7 +434,7 @@ const TicketList = () => {
                                 ),
                                 filtering: selectedCustomer.length > 0,
                             },
-                            {
+                            visibleColumns.service_request && {
                                 accessor: 'Service Request',
                                 sortable: false,
                                 render: ({ sr_desc }) => (
@@ -366,7 +476,7 @@ const TicketList = () => {
                                   filtering: srQuery !== '',
                                 
                             },
-                            {
+                           visibleColumns.machine && {
                                 accessor: 'Machine',
                                 sortable: false,
                                 render: ({ machine }) => (
@@ -407,7 +517,7 @@ const TicketList = () => {
                                   ),
                                   filtering: machineQuery !== '',
                             },
-                            {
+                            visibleColumns.priority && {
                                 accessor: 'Priority',
                                 sortable: false,
                                 render: ({ priority}) => (
@@ -444,7 +554,7 @@ const TicketList = () => {
                                 ),
                                 filtering: selectedPriority.length > 0,
                             },
-                            {
+                            visibleColumns.status && {
                                 accessor: 'Status',
                                 sortable: false,
                                 render: ({ sr_status }) => (
@@ -482,7 +592,7 @@ const TicketList = () => {
                                 filtering: selectedStatus.length > 0,
                             },
                             
-                            {
+                           visibleColumns.service_type && {
                                 accessor: 'Service Type',
                                 sortable: false,
                                 render: ({ service_type }) => (
@@ -519,7 +629,7 @@ const TicketList = () => {
                                 ),
                                 filtering: selectedServiceType.length > 0,
                             },
-                            {
+                            visibleColumns.assigned_to && {
                                 accessor: 'Assigned To',
                                 sortable: false,
                                 render: ({ assigned_to_name }) => (
@@ -556,7 +666,44 @@ const TicketList = () => {
                                 ),
                                 filtering: selectedEmployee.length > 0,
                             },
-                            {
+                            visibleColumns.assigned_by && {
+                                accessor: 'Assigned By',
+                                sortable: false,
+                                render: ({ assigned_by_name }) => (
+                                    <div className="flex items-center font-semibold">
+                                        <div>{assigned_by_name}</div>
+                                    </div>
+                                ),
+                                filter: (
+                                    <MultiSelect
+                                        label="Filter by User"
+                                        placeholder="Select Users..."
+                                        data={employees}
+                                        value={selectedEmployee}
+                                        onChange={setSelectedEmployee}
+                                        searchable
+                                        clearable
+                                        comboboxProps={{ withinPortal: false }}
+                                        leftSection={
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <circle cx="11" cy="11" r="8"></circle>
+                                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                            </svg>
+                                        }
+                                    />
+                                ),
+                                filtering: selectedEmployee.length > 0,
+                            },
+                            visibleColumns.rating && {
                                 accessor: 'Rating',
                                 sortable: false,
                                 render: ({ customer_rating }) => (
@@ -566,7 +713,7 @@ const TicketList = () => {
                                 ),
                             },
                             
-                        ]}
+                        ].filter(Boolean)}
                         highlightOnHover
                         totalRecords={initialRecords.length}
                         recordsPerPage={pageSize}

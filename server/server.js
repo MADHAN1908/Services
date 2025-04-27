@@ -34,6 +34,7 @@ app.use('/api/v1/tickets', require('./routes/tickets'));
 app.use('/api/v1/solutions', require('./routes/solution'));
 app.use('/api/v1/expenses', require('./routes/expense'));
 app.use('/api/v1/categories', require('./routes/category'));
+app.use('/api/v1/report', require('./routes/report'));
 
 app.all('*', (req, res) => {
   res.status(404);

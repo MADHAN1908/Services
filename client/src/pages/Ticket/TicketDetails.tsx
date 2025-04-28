@@ -634,7 +634,7 @@ const allCompleted = solutions.length > 0 && solutions.every(row => row.service_
             Start
           </button>
 }
-{(allCompleted && ticket.sr_status == "I" )  &&
+{(allCompleted && ticket.sr_status == "W" )  &&
           <button
             className="px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600"
             onClick={(e)=>handleArriveDate(ticket.sr_id,'act_out_time')}

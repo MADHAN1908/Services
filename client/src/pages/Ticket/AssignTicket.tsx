@@ -385,6 +385,15 @@ const AssignTicket = () => {
                                 ),
                                 filtering: selectedStatus.length > 0,
                             },
+                            {
+                                accessor: 'Assigned By',
+                                sortable: false,
+                                render: ({ assigned_by_name }) => (
+                                    <div className="flex items-center justify-center font-semibold">
+                                        <div>{assigned_by_name}</div>
+                                    </div>
+                                ),
+                            },
                           
                             // {
                             //     accessor: 'Assigned To',

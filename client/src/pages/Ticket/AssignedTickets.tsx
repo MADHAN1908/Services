@@ -2,9 +2,10 @@ import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useState, useEffect } from 'react';
 import { ticketService } from '../../services/ticketService';
+import { userService }  from '../../services/userService'
 import { getPriorty,getStatus } from '../../utils/commonFunction';
 import sortBy from 'lodash/sortBy';
-import { Button, MultiSelect, Stack, LoadingOverlay } from '@mantine/core';
+import { Button, MultiSelect, Stack, LoadingOverlay , Box,NumberInput,TextInput,ActionIcon } from '@mantine/core';
 import { DatePicker, type DatesRangeValue } from '@mantine/dates';
 import dayjs from 'dayjs';
 import { useDispatch } from 'react-redux';
@@ -17,6 +18,11 @@ const AssignedTicket = () => {
     const dispatch = useDispatch();
     const [items, setItems] = useState<any[]>([]);
     const [loader, setLoader] = useState(false);
+    const [customers, setCustomers] = useState([]);
+    const [employees, setEmployees] = useState([]);
+    const [managers, setManagers] = useState([]);
+    const [minSR_ID, setMinSR_ID] = useState<number | null>(null);
+    const [maxSR_ID, setMaxSR_ID] = useState<number | null>(null);
 
     const navigate = useNavigate();
     const userAuthDetail = sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') as string) : null;
@@ -27,6 +33,20 @@ const AssignedTicket = () => {
             navigate('/auth/login');
         }
     }, [userAuthDetail]);
+
+    const GetUsers = async () => {
+        try {
+            const response = await userService.getAdmins();
+            const Customers = response.UserDetails.filter((user : any) => user.role === 'Customer').map((user: any) => user.username);
+            const Managers = response.UserDetails.filter((user : any) => (user.role === 'Manager' || user.role === 'Admin')).map((user: any) => user.username);
+            const Employees = response.UserDetails.filter((user : any) => user.role === 'Employee').map((user: any) => user.username);
+            setCustomers(Customers);
+            setEmployees(Employees);
+            setManagers(Managers);
+        } catch (error) {
+            return ('Something Went Wrong');
+        }
+    }
 
      const GetTickets = async () => {
             try {
@@ -69,6 +89,7 @@ const AssignedTicket = () => {
         
         useEffect(() => {
             dispatch(setPageTitle('Assigned Ticket'));
+            GetUsers();
             GetTickets();
         },[]); 
 
@@ -85,6 +106,12 @@ const AssignedTicket = () => {
     const [selectedPriority,setSelectedPriority] = useState<string[]>([]);
     const [selectedStatus,setSelectedStatus] = useState<string[]>([]);
     const [srDateRange, setSRDateRange] = useState<DatesRangeValue>();
+    const [selectedCustomer,setSelectedCustomer] = useState<string[]>([]);
+    const [selectedEmployee,setSelectedEmployee] = useState<string[]>([]);
+    const [selectedManager,setSelectedManager] = useState<string[]>([]);
+    const [srQuery, setSRQuery] = useState('');
+    const [machineQuery, setMachineQuery] = useState('');
+    const [sr_idQuery, setSR_IDQuery] = useState('');
 
     useEffect(() => {
         setInitialRecords(() => {
@@ -107,6 +134,23 @@ const AssignedTicket = () => {
                         if (selectedStatus.length && !selectedStatus.some((d) => d === getStatus(ticket.sr_status || ''))) {
                             return false;
                         }
+                        if (selectedCustomer.length && !selectedCustomer.some((d) => d === ticket.contact_person_name )) {
+                            return false;
+                        }
+                        if (selectedEmployee.length && !selectedEmployee.some((d) => d === ticket.assigned_to_name )) {
+                            return false;
+                        }
+                        if (selectedManager.length && !selectedManager.some((d) => d === ticket.assigned_by_name )) {
+                            return false;
+                        }
+                        if (srQuery !== '' && !ticket.sr_desc.toLowerCase().includes(srQuery.trim().toLowerCase()))
+                            return false;
+                        if (machineQuery !== '' && !ticket.machine.toLowerCase().includes(machineQuery.trim().toLowerCase()))
+                            return false;
+                        if (sr_idQuery !== '' && !ticket.sr_id.toString().includes(sr_idQuery.toString()))
+                            return false;
+                        if (minSR_ID !== null && minSR_ID !== '' && ticket.sr_id < minSR_ID) return false;
+                        if (maxSR_ID !== null && maxSR_ID !== '' && ticket.sr_id > maxSR_ID) return false;
                         if (
                             srDateRange &&
                             srDateRange[0] &&
@@ -118,7 +162,7 @@ const AssignedTicket = () => {
                         return true;
                     })
                 );
-            }, [selectedPriority,selectedStatus,srDateRange]);
+            }, [selectedPriority,selectedStatus,selectedCustomer,selectedEmployee,selectedManager,srQuery,machineQuery,sr_idQuery,minSR_ID,maxSR_ID,srDateRange]);
 
     useEffect(() => {
         const from = (page - 1) * pageSize;
@@ -195,21 +239,6 @@ const AssignedTicket = () => {
                                     </div>
                                 ),
                             },
-                            // {
-                            //     accessor: '',
-                            //     title:'Expense',
-                            //     textAlignment: 'center',
-                            //     width:100,
-                            //     render: ({ sr_id,sr_status }) => (
-                            //         <div className='flex justify-center font-semibold'>
-                            //        {sr_status !== 'Z' && (['P','W', 'C','Y'].includes(sr_status)) &&
-                            //         <NavLink to={`/sr/expenses/${sr_id}`} className="btn btn-primary">
-                            //             Expense
-                            //            </NavLink>
-                            //        }
-                            //         </div>
-                            //     ),
-                            // }
                         ]:[]),
                             {
                                 accessor: '',
@@ -217,7 +246,7 @@ const AssignedTicket = () => {
                                 textAlignment: 'center',
                                 width:100,
                                 render: ({ sr_id,sr_status }) => (
-                                    <div className='flex justify-center font-semibold'>
+                                    <div className='flex justify-center px-2 font-semibold'>
                                    { (['P','W', 'C','Y','Z'].includes(sr_status)) &&
                                     <NavLink to={`/sr/expenses/${sr_id}`} className="btn btn-primary">
                                         Expense
@@ -251,6 +280,105 @@ const AssignedTicket = () => {
                                 title:'SR ID',
                                 sortable: true,
                                 render: ({ sr_id }) => <div className="flex  justify-center font-semibold">{sr_id}</div>,
+                                filter: (<Box>
+                                    <TextInput
+                                      label="SR ID"
+                                      description="Show ID's whose SR ID include the specified Number"
+                                      placeholder="Search SR ID's..."
+                                      leftSection={ <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>}
+                                      rightSection={
+                                        <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setSR_IDQuery('')}>
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                          <line x1="18" y1="6" x2="6" y2="18" />
+                                          <line x1="6" y1="6" x2="18" y2="18" />
+                                          </svg>
+                                        </ActionIcon>
+                                      }
+                                      value={sr_idQuery}
+                                      onChange={(e) => setSR_IDQuery(e.currentTarget.value)}
+                                    />
+                                    <Box mt={4} sx={{ display: 'flex', gap: 4 }}>
+                                      <NumberInput
+                                        size="xs"
+                                        placeholder="Min"
+                                        leftSection={ <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          >
+                                            <polyline points="6 9 12 15 18 9" />
+                                          </svg>}
+                                        rightSection={
+                                            <Box mr={12}>
+                                            <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMinSR_ID('')}>
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                              <line x1="18" y1="6" x2="6" y2="18" />
+                                              <line x1="6" y1="6" x2="18" y2="18" />
+                                              </svg>
+                                            </ActionIcon>
+                                            </Box>
+                                          }
+                                        value={minSR_ID}
+                                        onChange={setMinSR_ID}
+                                        style={{ flex: 1  }}
+                                        // styles={{ input: { width: 60 } }}
+                                      />
+                                      </Box>
+                                      <Box mt={4} sx={{ display: 'flex', gap: 4 }}>
+                                      <NumberInput
+                                        size="xs"
+                                        placeholder="Max"
+                                        leftSection={ <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          >
+                                            <polyline points="6 15 12 9 18 15" />
+                                          </svg>}
+                                        rightSection={
+                                            <Box mr={12}>
+                                            <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMaxSR_ID('')}>
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                              <line x1="18" y1="6" x2="6" y2="18" />
+                                              <line x1="6" y1="6" x2="18" y2="18" />
+                                              </svg>
+                                            </ActionIcon>
+                                            </Box>
+                                          }
+                                        value={maxSR_ID}
+                                        onChange={setMaxSR_ID}
+                                        style={{ flex: 1 }}
+                                        // styles={{ input: { width: 60 } }}
+                                      />
+                                    </Box>
+                                  </Box>
+                                  ),
+                                  filtering: sr_idQuery !== '' || (minSR_ID !== '' && minSR_ID !== null) || (maxSR_ID !== '' && maxSR_ID !== null),
                             },
                             {
                                 accessor: 'Date',
@@ -262,43 +390,136 @@ const AssignedTicket = () => {
                                     </div>
                                 ),
                                 filter: ({ close }) => (
-                                                                    <Stack>
-                                                                        <DatePicker
-                                                                        maxDate={new Date()}
-                                                                        type="range"
-                                                                        value={srDateRange}
-                                                                        onChange={setSRDateRange}
-                                                                        w="300px"
-                                                                    />
-                                                                    <Button
-                                                                        disabled={!srDateRange}
-                                                                        variant="light"
-                                                                        onClick={() => {
-                                                                            setSRDateRange(undefined);
-                                                                            close();
-                                                                        }}>Clear
-                                                                    </Button>
-                                                                    </Stack>
-                                                                ),
-                                                                filtering: Boolean(srDateRange),
+                                    <Stack>
+                                    <DatePicker
+                                    maxDate={new Date()}
+                                    type="range"
+                                    value={srDateRange}
+                                    onChange={setSRDateRange}
+                                    w="300px"
+                                />
+                                <Button
+                                    disabled={!srDateRange}
+                                    variant="light"
+                                    onClick={() => {
+                                        setSRDateRange(undefined);
+                                        close();
+                                    }}>Clear
+                                </Button>
+                                </Stack>
+                            ),
+                            filtering: Boolean(srDateRange),
+                                                                   
                             },
                             {
                                 accessor: 'Request By',
                                 title: 'Request By',
                                 sortable: true,
                                 render: ({ contact_person_name }) => <div className="font-semibold">{contact_person_name}</div>,
+                                filter: (
+                                    <MultiSelect
+                                        label="Filter by Customers"
+                                        placeholder="Select Customers..."
+                                        data={customers}
+                                        value={selectedCustomer}
+                                        onChange={setSelectedCustomer}
+                                        searchable
+                                        clearable
+                                        comboboxProps={{ withinPortal: false }}
+                                        leftSection={
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <circle cx="11" cy="11" r="8"></circle>
+                                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                            </svg>
+                                        }
+                                    />
+                                ),
+                                filtering: selectedCustomer.length > 0,
                             },
                             {
                                 accessor: 'Service Request',
                                 title:'Service Request',
                                 sortable: true,
                                 render: ({ sr_desc }) => <div className="font-semibold">{sr_desc}</div>,
+                                filter: (
+                                    <TextInput
+                                      label="Service Request"
+                                      description="Show Service Request whose content include the specified text"
+                                      placeholder="Search Service Request..."
+                                      leftSection={ <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>}
+                                      rightSection={
+                                        <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setSRQuery('')}>
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                          <line x1="18" y1="6" x2="6" y2="18" />
+                                          <line x1="6" y1="6" x2="18" y2="18" />
+                                          </svg>
+                                        </ActionIcon>
+                                      }
+                                      value={srQuery}
+                                      onChange={(e) => setSRQuery(e.currentTarget.value)}
+                                    />
+                                  ),
+                                  filtering: srQuery !== '',
                             },
                             {
                                 accessor: 'Machine',
                                 title:'Machine',
                                 sortable: true,
                                 render: ({ machine }) => <div className="font-semibold">{machine}</div>,
+                                filter: (
+                                    <TextInput
+                                      label="Machine"
+                                      description="Show Machine whose name include the specified text"
+                                      placeholder="Search Machines..."
+                                      leftSection={ <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>}
+                                      rightSection={
+                                        <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMachineQuery('')}>
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
+                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                          <line x1="18" y1="6" x2="6" y2="18" />
+                                          <line x1="6" y1="6" x2="18" y2="18" />
+                                          </svg>
+                                        </ActionIcon>
+                                      }
+                                      value={machineQuery}
+                                      onChange={(e) => setMachineQuery(e.currentTarget.value)}
+                                    />
+                                  ),
+                                  filtering: machineQuery !== '',
                             },
                             {
                                 accessor: 'Priority',
@@ -369,6 +590,81 @@ const AssignedTicket = () => {
                                     />
                                 ),
                                 filtering: selectedStatus.length > 0,
+                            },
+                            ...(role !== 'Employee' ? [{
+                                accessor: 'Assigned To',
+                                sortable: false,
+                                render: ({ assigned_to_name }) => (
+                                    <div className="flex items-center justify-center font-semibold">
+                                        <div>{assigned_to_name}</div>
+                                    </div>
+                                ),
+                                filter: (
+                                    <MultiSelect
+                                        label="Filter by User"
+                                        placeholder="Select Users..."
+                                        data={employees}
+                                        value={selectedEmployee}
+                                        onChange={setSelectedEmployee}
+                                        searchable
+                                        clearable
+                                        comboboxProps={{ withinPortal: false }}
+                                        leftSection={
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <circle cx="11" cy="11" r="8"></circle>
+                                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                            </svg>
+                                        }
+                                    />
+                                ),
+                                filtering: selectedEmployee.length > 0,
+                            },
+                        ]: []),
+                            {
+                                accessor: 'Assigned By',
+                                sortable: false,
+                                render: ({ assigned_by_name }) => (
+                                    <div className="flex items-center justify-center font-semibold">
+                                        <div>{assigned_by_name}</div>
+                                    </div>
+                                ),
+                                filter: (
+                                    <MultiSelect
+                                        label="Filter by Managers"
+                                        placeholder="Select managers..."
+                                        data={managers}
+                                        value={selectedManager}
+                                        onChange={setSelectedManager}
+                                        searchable
+                                        clearable
+                                        comboboxProps={{ withinPortal: false }}
+                                        leftSection={
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <circle cx="11" cy="11" r="8"></circle>
+                                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                            </svg>
+                                        }
+                                    />
+                                ),
+                                filtering: selectedManager.length > 0,
                             },
                             {
                                 accessor: 'Rating',

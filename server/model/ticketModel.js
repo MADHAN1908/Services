@@ -56,9 +56,11 @@ const getCustomerTickets = async (id) => {
 }
 
 const getAssignTickets = async () => {
-    const query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name,a.username as assigned_to_name FROM service.ticket AS t
+    const query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name,a.username as assigned_to_name,
+    m.username as assigned_by_name FROM service.ticket AS t
  LEFT JOIN public.users AS u ON t.contact_person = u.userid 
  LEFT JOIN public.users AS a ON t.assigned_to = a.userid
+ LEFT JOIN public.users AS m ON t.assigned_by = m.userid
  WHERE  t.assigned_to IS NULL OR sr_status IN ('P','X')    ORDER BY reported_date DESC`;
     const results = await db.raw(query);
     return results;
@@ -67,9 +69,11 @@ const getAssignTickets = async () => {
 const getAssignedTickets = async (id,role) => {
     let query;
     if(role == "Admin"){
-        query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date ,TO_CHAR(t.plan_in_time, 'DD-MON-YYYY HH:MM') AS plan_in_date, u.username as contact_person_name FROM service.ticket AS t
- LEFT JOIN public.users AS u 
- ON t.contact_person = u.userid 
+        query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date ,TO_CHAR(t.plan_in_time, 'DD-MON-YYYY HH:MM') AS plan_in_date, u.username as contact_person_name,
+        a.username as assigned_to_name,m.username as assigned_by_name FROM service.ticket AS t
+ LEFT JOIN public.users AS u ON t.contact_person = u.userid 
+ LEFT JOIN public.users AS a ON t.assigned_to = a.userid
+ LEFT JOIN public.users AS m ON t.assigned_by = m.userid
  Where t.sr_status NOT IN ('X')
  AND (
         t.sr_status != 'Z'
@@ -78,9 +82,11 @@ const getAssignedTickets = async (id,role) => {
  ORDER BY reported_date DESC`;
     }else if(role == "Manager"){
         // console.log(id,role);
-        query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name FROM service.ticket AS t
-    LEFT JOIN public.users AS u 
-    ON t.contact_person = u.userid 
+        query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name,
+        a.username as assigned_to_name,m.username as assigned_by_name FROM service.ticket AS t
+    LEFT JOIN public.users AS u ON t.contact_person = u.userid
+    LEFT JOIN public.users AS a ON t.assigned_to = a.userid
+    LEFT JOIN public.users AS m ON t.assigned_by = m.userid 
     WHERE  t.assigned_by = ${id} AND t.sr_status NOT IN ('X') 
      AND (
         t.sr_status != 'Z'
@@ -88,9 +94,11 @@ const getAssignedTickets = async (id,role) => {
     )
          ORDER BY reported_date DESC`;
        }else{
-     query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name FROM service.ticket AS t
- LEFT JOIN public.users AS u 
- ON t.contact_person = u.userid 
+     query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name,
+     a.username as assigned_to_name,m.username as assigned_by_name FROM service.ticket AS t
+ LEFT JOIN public.users AS u ON t.contact_person = u.userid
+ LEFT JOIN public.users AS a ON t.assigned_to = a.userid
+ LEFT JOIN public.users AS m ON t.assigned_by = m.userid
  WHERE  t.assigned_to = ${id} 
   AND (
         t.sr_status != 'Z'

@@ -17,6 +17,7 @@ const TicketList = () => {
     const [items, setItems] = useState<any[]>([]);
     const [customers, setCustomers] = useState([]);
     const [employees, setEmployees] = useState([]);
+    const [managers, setManagers] = useState([]);
     const [loader, setLoader] = useState(false);
     const [minSR_ID, setMinSR_ID] = useState<number | null>(null);
     const [maxSR_ID, setMaxSR_ID] = useState<number | null>(null);
@@ -50,10 +51,10 @@ const TicketList = () => {
             const response = await userService.getAdmins();
             const Customers = response.UserDetails.filter((user : any) => user.role === 'Customer').map((user: any) => user.username);
             const Employees = response.UserDetails.filter((user : any) => user.role === 'Employee').map((user: any) => user.username);
+            const Managers = response.UserDetails.filter((user : any) => (user.role === 'Manager' || user.role === 'Admin')).map((user: any) => user.username);
             setCustomers(Customers);
             setEmployees(Employees);
-            // console.log(response.UserDetails);
-            // console.log(Customers);
+            setManagers(Managers);
         } catch (error) {
             return ('Something Went Wrong');
         }
@@ -95,6 +96,7 @@ const TicketList = () => {
     const [selectedStatus,setSelectedStatus] = useState<string[]>([]);
     const [selectedCustomer,setSelectedCustomer] = useState<string[]>([]);
     const [selectedEmployee,setSelectedEmployee] = useState<string[]>([]);
+    const [selectedManager,setSelectedManager] = useState<string[]>([]);
     const [selectedServiceType,setSelectedServiceType] = useState<string[]>([]);
     const [srDateRange, setSRDateRange] = useState<DatesRangeValue>();
     const [srQuery, setSRQuery] = useState('');
@@ -144,6 +146,9 @@ const TicketList = () => {
                 if (selectedEmployee.length && !selectedEmployee.some((d) => d === ticket.assigned_to_name )) {
                     return false;
                 }
+                if (selectedManager.length && !selectedManager.some((d) => d === ticket.assigned_by_name )) {
+                    return false;
+                }
                 if (selectedServiceType.length && !selectedServiceType.some((d) => d === getServiceType(ticket.service_type || ''))) {
                     return false;
                 }
@@ -166,7 +171,7 @@ const TicketList = () => {
                 return true;
             })
         );
-    }, [sr_idQuery,srQuery,machineQuery,selectedPriority,selectedCustomer,selectedEmployee,selectedServiceType,selectedStatus,srDateRange,minSR_ID,maxSR_ID]);
+    }, [sr_idQuery,srQuery,machineQuery,selectedPriority,selectedCustomer,selectedEmployee,selectedManager,selectedServiceType,selectedStatus,srDateRange,minSR_ID,maxSR_ID]);
 
 
     return (
@@ -235,12 +240,10 @@ const TicketList = () => {
                                 filter :(<Box mb={16}>
                                     <Text fw={700} mb={8}>Visible Columns</Text>
                                   
-                                    {Object.keys(visibleColumns).map((columnKey) => (<div className="flex">
+                                    {Object.keys(visibleColumns).map((columnKey) => (<div className="flex gap-2">
                                       <Checkbox
                                         key={columnKey}
-                                        className="flex-1"
-                                        // label={<Text fw={600}>{columnKey.toUpperCase()}</Text>}
-                                        // label={columnKey.toUpperCase()}
+                                        className="flex"
                                         checked={visibleColumns[columnKey]}
                                         onChange={(e) =>
                                           setVisibleColumns({
@@ -250,7 +253,7 @@ const TicketList = () => {
                                         }
                                         mb={8}
                                       />
-                                    <Text className="flex-2">{columnKey.toUpperCase()}</Text></div>
+                                    <Text className="">{columnKey.toUpperCase()}</Text></div>
                                     ))}
                                   </Box>),
                                   filtering: true,
@@ -676,11 +679,11 @@ const TicketList = () => {
                                 ),
                                 filter: (
                                     <MultiSelect
-                                        label="Filter by User"
-                                        placeholder="Select Users..."
-                                        data={employees}
-                                        value={selectedEmployee}
-                                        onChange={setSelectedEmployee}
+                                        label="Filter by Managers"
+                                        placeholder="Select managers..."
+                                        data={managers}
+                                        value={selectedManager}
+                                        onChange={setSelectedManager}
                                         searchable
                                         clearable
                                         comboboxProps={{ withinPortal: false }}
@@ -701,7 +704,7 @@ const TicketList = () => {
                                         }
                                     />
                                 ),
-                                filtering: selectedEmployee.length > 0,
+                                filtering: selectedManager.length > 0,
                             },
                             visibleColumns.rating && {
                                 accessor: 'Rating',

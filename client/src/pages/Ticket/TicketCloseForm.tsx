@@ -118,7 +118,7 @@ const TicketCloseForm = () => {
             MOC:'',
             sr_desc: '',
             sr_id:'',
-            sr_status: 'I',
+            sr_status: 'W',
             machine: '',
             priority: '',
             service_type: '',

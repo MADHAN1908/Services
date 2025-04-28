@@ -114,7 +114,7 @@ const Sidebar = () => {
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to="/customers" className="group">
+                                <NavLink to="/company" className="group">
                                     <div className="flex items-center">
                                         <svg className="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <circle opacity="0.5" cx="15" cy="6" r="3" fill="currentColor" />
@@ -122,7 +122,7 @@ const Sidebar = () => {
                                             <circle cx="9.00098" cy="6" r="4" fill="currentColor" />
                                             <ellipse cx="9.00098" cy="17.001" rx="7" ry="4" fill="currentColor" />
                                         </svg>
-                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Customers')}</span>
+                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Company')}</span>
                                     </div>
                                 </NavLink>
                             </li>

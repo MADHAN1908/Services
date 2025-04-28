@@ -1,36 +1,17 @@
 import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
+import { LoadingOverlay } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import sortBy from 'lodash/sortBy';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPageTitle } from '../../store/themeConfigSlice';
+import { companyService } from '../../services/companyService';
+import { showToast } from '../../utils/commonFunction';
 
 const CompanyList = () => {
     const dispatch = useDispatch();
-    const [items, setItems] = useState([
-        {
-            id: 1,
-            name: 'NovaTech',
-            address: '123, 12th street',
-            city:'Chennai',
-            state:'Tamil Nadu',
-            country:'India',
-            postal_code:'600047',
-            email: 'mkmadhan1908@gmail.com',
-            phone_no: '9876543210',
-        },
-        // {
-        //     id: 2,
-        //     userid: 'U67890',
-        //     username: 'Kumar',
-        //     ticketid:'14',
-        //     title: 'Bug in Feature',
-        //     priority: 'Medium',
-        //     status: 'Closed',
-        //     date: '24-JAN-2025',
-        //     support:'Arun',
-        // },
-    ]);
+    const [items, setItems] = useState([]);
+    const [loader, setLoader] = useState(false);
     const navigate = useNavigate();
     const userAuthDetail = sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') as string) : null;
     const role = userAuthDetail?.role?userAuthDetail.role:'Manage';
@@ -40,10 +21,31 @@ const CompanyList = () => {
         }
     }, [userAuthDetail])
 
+
+    const GetCompanies = async () => {
+        try {
+            setLoader(true);
+            const response = await companyService.getCompanies();
+            setItems(response.CompanyList);
+            setInitialRecords(response.CompanyList);
+            console.log(response.CompanyList);
+            setLoader(false);
+        } catch (error) {
+            setLoader(false);
+            return ('Something Went Wrong');
+        }
+    }
+
+    useEffect(() => {
+        dispatch(setPageTitle('Company List'));
+        GetCompanies();
+    },[]);   
+
+
     const [page, setPage] = useState(1);
     const PAGE_SIZES = [10, 20, 30, 50, 100];
     const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
-    const [initialRecords, setInitialRecords] = useState(sortBy(items, 'id'));
+    const [initialRecords, setInitialRecords] = useState(sortBy(items, 'company_id'));
     const [records, setRecords] = useState(initialRecords);
     const [selectedRecords, setSelectedRecords] = useState<any>([]);
 
@@ -55,7 +57,6 @@ const CompanyList = () => {
 
     useEffect(() => {
         setPage(1);
-        /* eslint-disable react-hooks/exhaustive-deps */
     }, [pageSize]);
 
     useEffect(() => {
@@ -83,27 +84,47 @@ const CompanyList = () => {
         setPage(1);
     }, [sortStatus]);
 
+    const deleteRow = async(id: any ) => {
+           
+        if (window.confirm('Are you sure want to delete selected Company ?')) {
+            if (id) {
+                try {
+                    const response = await companyService.deleteCompany(id);
+                    if (response.response =='Success' ) {
+                        GetCompanies();
+                        showToast('Company Deleted Successfullly','success'); 
+                    }
+                } catch (error) {
+                    return ('Something Went Wrong');
+                }
+            } 
+        }
+    };
+
     return (
         <div className="panel px-0 border-white-light dark:border-[#1b2e4b]">
             <div className="invoice-table">
                 <div className="mb-4.5 px-5 w-full flex md:items-center md:flex-row flex-col gap-5">
                     <div className="flex  items-center w-72 gap-2">
                        
-                        <Link to="/customers/add" className="btn btn-primary  gap-2">
+                        <Link to="/company/add" className="btn btn-primary  gap-2">
                             <svg className="w-5 h-5" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>
-                            Create Customers
+                            Create Company
                         </Link>
                     </div>
-                    <h3 className="flex text-xl w-full font-semibold justify-center">Company Lists</h3>
+                    <h3 className="flex text-xl w-full font-semibold justify-center">Company List</h3>
                     <div className="ltr:ml-auto rtl:mr-auto">
                         <input type="text" className="form-input w-auto" placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
                     </div>
                 </div>
 
                 <div className="datatables pagination-padding">
+                {loader &&
+        <LoadingOverlay visible={loader} loaderProps={{ children: 'Loading...' }} />
+    }
                     <DataTable
                         className="whitespace-nowrap table-hover"
                         withColumnBorders
@@ -116,26 +137,9 @@ const CompanyList = () => {
                                 title: 'Actions',
                                 sortable: false,
                                 textAlignment: 'center',
-                                render: ({ id }) => (
+                                render: ({ company_id }) => (
                                     <div className="flex gap-4 items-center w-max mx-auto">
-                                        {/* <NavLink to={'/ticketdetails'} className="flex hover:text-info">
-                                        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={24}
-            height={24}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={`w-6 h-6 `}
-        >
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-            <circle cx="12" cy="12" r="3"></circle>
-        </svg>
-        </NavLink> */}
-                                        <NavLink to={`/users/edit/${ id }`} className="flex hover:text-info">
+                                        <NavLink to={`/company/edit/${ company_id }`} className="flex hover:text-info">
                                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-4.5 h-4.5">
                                                 <path
                                                     opacity="0.5"
@@ -158,7 +162,7 @@ const CompanyList = () => {
                                             </svg>
                                         </NavLink>
                                     
-                                        <button type="button" className="flex hover:text-danger" >
+                                        <button type="button" className="flex hover:text-danger" onClick={(e) => deleteRow(company_id)} >
                                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5">
                                                 <path d="M20.5001 6H3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"></path>
                                                 <path
@@ -185,9 +189,9 @@ const CompanyList = () => {
                                 accessor: 'Company_Id',
                                 title:'Company ID',
                                 sortable: true,
-                                render: ({  id }) => (
+                                render: ({  company_id }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{id}</div>
+                                        <div>{company_id}</div>
                                     </div>
                                 ),
                             },
@@ -195,16 +199,16 @@ const CompanyList = () => {
                                 accessor: 'Company_Name',
                                 title:'Company Name',
                                 sortable: true,
-                                render: ({ name, id }) => (
+                                render: ({ company_name}) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{name}</div>
+                                        <div>{company_name}</div>
                                     </div>
                                 ),
                             },
                             {
                                 accessor: 'Email',
                                 sortable: true,
-                                render: ({ email, id }) => (
+                                render: ({ email }) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{email}</div>
                                     </div>
@@ -213,7 +217,7 @@ const CompanyList = () => {
                             {
                                 accessor: 'Phone No',
                                 sortable: true,
-                                render: ({ phone_no, id }) => (
+                                render: ({ phone_no}) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{phone_no}</div>
                                     </div>
@@ -222,7 +226,7 @@ const CompanyList = () => {
                             {
                                 accessor: 'Address',
                                 sortable: true,
-                                render: ({ address, id }) => (
+                                render: ({ address }) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{address}</div>
                                     </div>
@@ -231,7 +235,7 @@ const CompanyList = () => {
                             {
                                 accessor: 'City',
                                 sortable: true,
-                                render: ({ city, id }) => (
+                                render: ({ city  }) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{city}</div>
                                     </div>
@@ -240,7 +244,7 @@ const CompanyList = () => {
                             {
                                 accessor: 'State',
                                 sortable: true,
-                                render: ({ state, id }) => (
+                                render: ({ state }) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{state}</div>
                                     </div>
@@ -249,7 +253,7 @@ const CompanyList = () => {
                             {
                                 accessor: 'Country',
                                 sortable: true,
-                                render: ({ country, id }) => (
+                                render: ({ country }) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{country}</div>
                                     </div>
@@ -259,7 +263,7 @@ const CompanyList = () => {
                                 accessor: 'Postal Code',
                                 title: 'Postal Code',
                                 sortable: true,
-                                render: ({ postal_code, id }) => (
+                                render: ({ postal_code }) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{postal_code}</div>
                                     </div>

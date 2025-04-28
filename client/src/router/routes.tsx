@@ -11,8 +11,9 @@ const ContactAdd = lazy(() => import('../pages/Contacts/Add'));
 const ContactEdit = lazy(() => import('../pages/Contacts/Edit'));
 const ContactLog = lazy(() => import('../pages/Contacts/Logs'));
 
-const CustomerCompany = lazy(() => import('../pages/Customers/CustomerCompany'));
-const CompanyList = lazy(() => import('../pages/Customers/CompanyList'));
+const AddCompany = lazy(() => import('../pages/Company/Add'));
+const CompanyList = lazy(() => import('../pages/Company/List'));
+const EditCompany = lazy(() => import('../pages/Company/Edit'));
 
 const TicketList = lazy(() => import('../pages/Ticket/TicketList'));
 const AddTicket = lazy(() => import('../pages/Ticket/AddTicket'));
@@ -85,12 +86,16 @@ const routes = [
     },
     //Customer Company
     {
-        path: '/customers',
+        path: '/company',
         element: <CompanyList />,
     },
     {
-        path: '/customers/add',
-        element: <CustomerCompany />,
+        path: '/company/add',
+        element: <AddCompany />,
+    },
+    {
+        path: '/company/edit/:id',
+        element: <EditCompany />,
     },
 
     // Ticket

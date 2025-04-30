@@ -14,16 +14,25 @@ const PORT = process.env.PORT || 3500;
 // Cross Origin Resource Sharing
 app.use(cors());
 
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+// });
+
 //serve static files
 app.use('/', express.static(path.join(__dirname, '/public')));
+
 
 // built-in middleware to handle urlencoded form data
 app.use(express.urlencoded({ extended: false }));
 
 // built-in middleware for json 
 app.use(express.json());
+
 app.use('/api/v1/uploads', express.static(path.join(__dirname, 'uploads')));
 // for parsing multipart/form-data
+
 
 
 // routes

@@ -598,7 +598,7 @@ const TicketCloseForm = () => {
                 {/* Grid */}
                 <div className="panel" id="forms_grid">
                     <div className="flex items-center justify-center mb-5">
-                        <h5 className="font-semibold text-lg dark:text-white-light">SR Close Form</h5>
+                        <h5 className="font-semibold text-lg dark:text-white-light">Create Self SR</h5>
                     </div>
                     {isPreviewVisible && previewImage && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

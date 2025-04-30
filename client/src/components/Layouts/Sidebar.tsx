@@ -203,7 +203,10 @@ const Sidebar = () => {
                             <AnimateHeight duration={300} height={currentMenu === 'contacts' ? 'auto' : 0}>
                                 <ul className="sub-menu text-gray-500">
                                 { (role=='Admin'|| role=='Manager' || role=='Employee' || role == 'Customer' ) &&
-                                    <li><NavLink to="/sr/add" onClick={() => dispatch(toggleSidebar())}>{t('Create')}</NavLink></li>
+                                    <li><NavLink to="/sr/add" onClick={() => dispatch(toggleSidebar())}>{t('Create SR')}</NavLink></li>
+                                    }
+                                { (role=='Admin'|| role=='Manager' || role=='Employee' ) &&
+                                    <li><NavLink to="/sr/closeform" onClick={() => dispatch(toggleSidebar())}>{t('Create Self SR')}</NavLink></li>
                                     }
                                 { (role=='Admin'|| role=='Manager' ) &&
                                     <li><NavLink to="/sr/assign"  onClick={() => dispatch(toggleSidebar())}>{t('Assign')}</NavLink></li>

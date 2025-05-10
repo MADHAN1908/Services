@@ -321,7 +321,7 @@ const AddTicket = () => {
       )}
                     <div className="mb-5">
                         <form className="space-y-5" onSubmit={handleSubmit}>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                                     <label htmlFor="customer">Company *</label>
                                     <select name="customer"
@@ -355,8 +355,7 @@ const AddTicket = () => {
                                         )}
                                     </select>
                                 </div>
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                
                                 <div>
                                     <label htmlFor="MOC">Mode of Communication *</label>
                                     <select name="MOC"
@@ -374,7 +373,6 @@ const AddTicket = () => {
                                         }
                                     </select>
                                 </div>
-                                <div className='flex gap-2 w-full'>
                                     
                                     <div>
                                 <label htmlFor="Date">Reported Date *</label>
@@ -415,7 +413,7 @@ const AddTicket = () => {
                                     onChange={(date) => setFormData({...formData,expected_date:date[0]})}
                                 />
                                 </div>
-                                </div>
+                                
 
                                 <div>
                                     <label htmlFor="title">Service Request *</label>

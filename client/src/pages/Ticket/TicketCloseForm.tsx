@@ -65,7 +65,7 @@ const TicketCloseForm = () => {
         const [editSR, setEditSR] = useState(true);
         const [loader, setLoader] = useState(false);
         const isFirstRender = useRef(true);
-        let userID;
+        const [userID,setUserID] = useState('');
 
         useEffect(() => {
           hasUnsavedChangesRef.current = hasUnsavedChanges;
@@ -126,9 +126,9 @@ const TicketCloseForm = () => {
             expected_date:'',
             assigned_to:'',
             assigned_by:'',
-            assigned_date:'',
-            in_time :'',
-            out_time:'',
+            assigned_date:new Date(),
+            in_time :new Date(),
+            out_time:new Date().setHours(new Date().getHours() + 1),
         });
         const userAuthDetail = sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') as string) : null;
         const role = userAuthDetail?.role?userAuthDetail.role:'Manage';
@@ -176,17 +176,18 @@ const TicketCloseForm = () => {
                         }
                     }
 
-                    const GetAssignedByUsers = async () => {
+                  const GetAssignedByUsers = async () => {
                         try {
                             const response = await userService.getAssignedByUsers();
                             setAssignedByUsers(response.AssignedByUsers);
-                            userID = response.user;
+                            setUserID(response.user);
                             // setInitialRecords(response.AssignTickets);
-                            console.log('ID',userID);
+                            console.log('ID',response.user);
+                            setFormData({ ...formData, assigned_to: response.user })
                             } catch (error) {
                             return ('Something Went Wrong');
                         }
-                    }
+                  }
     
         useEffect(() => {
             dispatch(setPageTitle('Close SR'));
@@ -615,7 +616,8 @@ const TicketCloseForm = () => {
       )}
                     <div className="mb-5">
                         <form className="space-y-5" >
-                        <div className="grid grid-cols-1 p-2 border-1 rounded bg-gray-100 sm:grid-cols-2 gap-4">
+                          <div className ="p-2 border-1 rounded bg-gray-100">
+                        <div className="grid grid-cols-1  sm:grid-cols-3 gap-4">
                         <div>
                                     <label htmlFor="customer">Company *</label>
                                     <select name="customer"
@@ -819,12 +821,19 @@ const TicketCloseForm = () => {
                                  />
 
                                 </div>
-                                <div>
+                                {/* <div>
+                                    {!formData.sr_id && <button className="btn btn-primary !mt-6" onClick={handleSubmit}>Save</button>}
+                                    {(formData.sr_id && editSR===false) && <button className="btn btn-primary !mt-6" onClick={() => setEditSR(true)}>Edit</button>}
+                                    {(formData.sr_id && editSR===true) && <button className="btn btn-primary !mt-6" onClick={() => setEditSR(false)}>Update</button>}
+                                    </div> */}
+                            </div>
+
+                            <div>
                                     {!formData.sr_id && <button className="btn btn-primary !mt-6" onClick={handleSubmit}>Save</button>}
                                     {(formData.sr_id && editSR===false) && <button className="btn btn-primary !mt-6" onClick={() => setEditSR(true)}>Edit</button>}
                                     {(formData.sr_id && editSR===true) && <button className="btn btn-primary !mt-6" onClick={() => setEditSR(false)}>Update</button>}
                                     </div>
-                            </div>
+                                    </div>
 
                             <div className="mb-4.5 px-5 flex md:items-center md:flex-row flex-col gap-5">
                                                       {/* <div className="flex items-center gap-2"> */}

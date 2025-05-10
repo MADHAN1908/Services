@@ -799,7 +799,16 @@ const TicketCloseForm = () => {
                                      time_24hr: true, 
                                      enableTime: true }} 
                                 className="form-input" 
-                                onChange={(date) => setFormData({ ...formData, in_time: date[0] })}
+                                onChange={(date) => {
+                                  const inTime = date[0];
+                                  const outTime = new Date(inTime.getTime() + 60 * 60 * 1000); 
+                                  setFormData({ 
+                                    ...formData, 
+                                    in_time: inTime, 
+                                    out_time: outTime 
+                                  });
+                                }}
+                                // onChange={(date) => setFormData({ ...formData, in_time: date[0] })}
                                 disabled={editSR === false}
                                  />
 

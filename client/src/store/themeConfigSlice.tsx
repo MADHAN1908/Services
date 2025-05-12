@@ -132,9 +132,10 @@ const themeConfigSlice = createSlice({
         toggleSidebar(state) {
             state.sidebar = !state.sidebar;
         },
+        
 
         setPageTitle(state, { payload }) {
-            document.title = `${payload} |  Campaign Management`;
+            document.title = `${payload} |  Service Management`;
         },
     },
 });

@@ -3,6 +3,7 @@ import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useState, useEffect } from 'react';
 import { expenseService } from '../../services/expenseService';
 import { categoryService } from '../../services/categoryService';
+import { userService } from '../../services/userService';
 import sortBy from 'lodash/sortBy';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../store/themeConfigSlice';
@@ -21,6 +22,7 @@ const ExpenseList = () => {
     const [maxExpense_id, setMaxExpense_id] = useState<number | null>(null);
     const [minAmount, setMinAmount] = useState<number | null>(null);
     const [maxAmount, setMaxAmount] = useState<number | null>(null);
+    const [users, setUsers] = useState([]);
     const navigate = useNavigate();
     const userAuthDetail = sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') as string) : null;
     const role = userAuthDetail?.role?userAuthDetail.role:'Manage';
@@ -54,11 +56,22 @@ const ExpenseList = () => {
                     return ('Something Went Wrong');
                 }
         }
+        const GetUsers = async () => {
+                try {
+                    const response = await userService.getAdmins();
+                    const Users = response.UserDetails.filter((user : any) => user.role !== 'Customer').map((user: any) => user.username);
+                    setUsers(Users);
+                    
+                } catch (error) {
+                    return ('Something Went Wrong');
+                }
+            }
 
             useEffect(() => {
                 dispatch(setPageTitle('Expense List'));
                 GetExpenses();
                 GetCategory();
+                GetUsers();
             },[]);   
 
     const [page, setPage] = useState(1);
@@ -74,8 +87,7 @@ const ExpenseList = () => {
         direction: 'desc',
     });
     const [selectedExpenseType,setSelectedExpenseType] = useState<string[]>([]);
-    // const [selectedStatus,setSelectedStatus] = useState<string[]>([]);
-    // const [selectedServiceType,setSelectedServiceType] = useState<string[]>([]);
+    const [selectedUser,setSelectedUser] = useState<string[]>([]);
     const [expenseDateRange, setExpenseDateRange] = useState<DatesRangeValue>();
     const [descriptionQuery, setDescriptionQuery] = useState('');
     const [expense_idQuery, setExpense_idQuery] = useState('');
@@ -125,6 +137,9 @@ const ExpenseList = () => {
                 if (selectedExpenseType.length && !selectedExpenseType.some((d) => d === expense.category_name)) {
                     return false;
                 }
+                if (selectedUser.length && !selectedUser.some((d) => d === expense.assigned_to_username)) {
+                    return false;
+                }
                 if (
                     expenseDateRange &&
                     expenseDateRange[0] &&
@@ -151,7 +166,7 @@ const ExpenseList = () => {
                 return true;
             })
         );
-    }, [expense_idQuery, sr_idQuery,descriptionQuery,amountQuery,selectedExpenseType,expenseDateRange,minSR_ID,maxSR_ID,minExpense_id,maxExpense_id,minAmount,maxAmount]);
+    }, [expense_idQuery, sr_idQuery,descriptionQuery,amountQuery,selectedExpenseType,selectedUser,expenseDateRange,minSR_ID,maxSR_ID,minExpense_id,maxExpense_id,minAmount,maxAmount]);
 
     return (
         <div className="panel px-0 border-white-light dark:border-[#1b2e4b]">
@@ -417,9 +432,43 @@ const ExpenseList = () => {
                                   filtering: sr_idQuery !== '' || (minSR_ID !== '' && minSR_ID !== null) || (maxSR_ID !== '' && maxSR_ID !== null),
                             },
                             {
+                                accessor: 'user',
+                                title:'UserName',
+                                sortable: false,
+                                render: ({ assigned_to_username }) => <div className="flex  justify-center font-semibold">{assigned_to_username}</div>,
+                                filter: (
+                                    <MultiSelect
+                                        label="Filter by Users"
+                                        placeholder="Select Users..."
+                                        data={users}
+                                        value={selectedUser}
+                                        onChange={setSelectedUser}
+                                        searchable
+                                        clearable
+                                        comboboxProps={{ withinPortal: false }}
+                                        leftSection={
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <circle cx="11" cy="11" r="8"></circle>
+                                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                            </svg>
+                                        }
+                                    />
+                                ),
+                                filtering: selectedUser.length > 0,
+                            },
+                            {
                                 accessor: 'expenses_type',
                                 title:'Expenses Type',
-                                sortable: true,
+                                sortable: false,
                                 render: ({ category_name }) => <div className="flex  justify-center font-semibold">{category_name}</div>,
                                 filter: (
                                     <MultiSelect

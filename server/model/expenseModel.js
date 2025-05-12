@@ -8,8 +8,10 @@ const createExpense = async (data) => {
 }
 
 const getAllExpenses = async (user) => {
-    let query = `SELECT e.* ,TO_CHAR(e.expense_date, 'DD-Mon-YYYY') AS formatted_expense_date,c.name AS category_name from service.expenses e LEFT JOIN 
-    service.categories c ON e.expense_type = c.category_id  `;
+    let query = `SELECT e.* ,TO_CHAR(e.expense_date, 'DD-Mon-YYYY') AS formatted_expense_date,c.name AS category_name ,u.username AS assigned_to_username
+    from service.expenses e LEFT JOIN  service.categories c ON e.expense_type = c.category_id
+    LEFT JOIN service.ticket t ON e.sr_id = t.sr_id
+    LEFT JOIN public.users u ON t.assigned_to = u.userid `;
     let ticketIds = [];
     if (user.role === 'Manager' || user.role === 'Employee') {
         const Tickets = await db.raw(`
@@ -30,7 +32,6 @@ const getAllExpenses = async (user) => {
       query += ` ORDER BY e.sr_id DESC, e.expense_date `;
     
       const results = await db.raw(query);
-    // const results = await db.raw(query);
     return results;
 }
 

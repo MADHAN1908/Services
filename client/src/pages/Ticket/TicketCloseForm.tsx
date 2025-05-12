@@ -1,13 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
-import { setPageTitle } from '../../store/themeConfigSlice';
+import { setPageTitle,toggleSidebar} from '../../store/themeConfigSlice';
 import { useDispatch } from 'react-redux';
-import { Link, useNavigate ,useLocation} from 'react-router-dom';
+import { useNavigate ,useLocation} from 'react-router-dom';
 import { userService } from '../../services/userService';
 import { solutionService } from '../../services/solutionService';
 import { ticketService } from '../../services/ticketService';
 import { showToast } from '../../utils/commonFunction';
 import { DataTable } from 'mantine-datatable';
-import { format } from 'date-fns';
 import { Button, LoadingOverlay } from "@mantine/core";
 import Flatpickr from 'react-flatpickr';
 import "flatpickr/dist/themes/airbnb.css";
@@ -47,7 +46,7 @@ interface SolutionData {
     customer_feedback:string,
   }
 const TicketCloseForm = () => {
-    const dispatch = useDispatch();
+        const dispatch = useDispatch();
         const navigate = useNavigate();
         const location = useLocation();
         const [assignedByUsers, setAssignedByUsers] = useState<any[]>([]);
@@ -65,7 +64,6 @@ const TicketCloseForm = () => {
         const [editSR, setEditSR] = useState(true);
         const [loader, setLoader] = useState(false);
         const isFirstRender = useRef(true);
-        const [userID,setUserID] = useState('');
 
         useEffect(() => {
           hasUnsavedChangesRef.current = hasUnsavedChanges;
@@ -102,33 +100,24 @@ const TicketCloseForm = () => {
         
             }, [location.pathname]);
         
-        const isRowsChanged = (): boolean => {
-            return tableData.some((row) => {
-              const originalRow = solutions.find((solution) => solution.solution_id === row.solution_id);
-              if (!originalRow) return true;
-          
-              return Object.keys(originalRow).some(
-                (key) => JSON.stringify(originalRow[key as keyof typeof originalRow]) !== JSON.stringify(row[key as keyof typeof row])
-              );
-            });
-          };
+          const today = new Date();
         const [formData, setFormData] = useState<FormData>({
             company_id: '',
             contact_person: '',
-            MOC:'',
+            MOC:"E",
             sr_desc: '',
             sr_id:'',
             sr_status: 'W',
             machine: '',
-            priority: '',
-            service_type: '',
-            reported_date: new Date(),
-            expected_date:'',
+            priority: "M",
+            service_type: "M",
+            reported_date: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
+            expected_date:new Date(),
             assigned_to:'',
             assigned_by:'',
-            assigned_date:new Date(),
-            in_time :new Date(),
-            out_time:new Date().setHours(new Date().getHours() + 1),
+            assigned_date:new Date(new Date().setHours(new Date().getHours() - 2)),
+            in_time :new Date(new Date().setHours(new Date().getHours() - 1)),
+            out_time:new Date(),
         });
         const userAuthDetail = sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') as string) : null;
         const role = userAuthDetail?.role?userAuthDetail.role:'Manage';
@@ -158,8 +147,7 @@ const TicketCloseForm = () => {
                 try {
                     // console.log(id);
                     const response = await userService.getContactPerson(id);
-                    console.log("Received Customer Contacts:", response.CustomerContacts);
-                    console.log(response.CustomerContacts);
+                    // console.log(response.CustomerContacts);
                     setContactPerson(response.CustomerContacts);
                 } catch (error) {
                     alert('Something Went Wrong');
@@ -169,8 +157,7 @@ const TicketCloseForm = () => {
                         try {
                             const response = await userService.getAssignUsers();
                             setUsers(response.AssignUsers);
-                            // setInitialRecords(response.AssignTickets);
-                            console.log(response.AssignUsers);
+                            // console.log(response.AssignUsers);
                             } catch (error) {
                             return ('Something Went Wrong');
                         }
@@ -180,10 +167,7 @@ const TicketCloseForm = () => {
                         try {
                             const response = await userService.getAssignedByUsers();
                             setAssignedByUsers(response.AssignedByUsers);
-                            setUserID(response.user);
-                            // setInitialRecords(response.AssignTickets);
-                            console.log('ID',response.user);
-                            setFormData({ ...formData, assigned_to: response.user })
+                            setFormData({ ...formData, assigned_to: response.user ,assigned_by : response.user })
                             } catch (error) {
                             return ('Something Went Wrong');
                         }
@@ -191,9 +175,10 @@ const TicketCloseForm = () => {
     
         useEffect(() => {
             dispatch(setPageTitle('Close SR'));
+            // dispatch(toggleSidebar());
+            GetAssignedByUsers();
             GetCustomers();
             GetUsers();
-            GetAssignedByUsers();
         },[]);
         
 
@@ -718,6 +703,7 @@ const TicketCloseForm = () => {
                                 <div>
                                     <label htmlFor="priority">Priority *</label>
                                     <select name="priorty"
+                                        value ={formData.priority}
                                         onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
                                         className="form-select"
                                         disabled={editSR === false}

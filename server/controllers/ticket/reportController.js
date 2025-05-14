@@ -3,11 +3,13 @@ const ejs = require('ejs');
 const puppeteer = require('puppeteer');
 const nodemailer = require('nodemailer');
 const ticketModel = require('../../model/ticketModel');
+const emailQueue = require('../../model/emailQueue');
 const pgsdb = require('../../library/pgsdb');
 const db = new pgsdb();
 
 const getReport = async (req, res) => {
     try {
+      const user = req.user;
     const id = parseInt(req.params.id);
     const result = await ticketModel.getReport(id);
 
@@ -17,25 +19,39 @@ const getReport = async (req, res) => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.setContent(html);
-    const pdfPath = path.join(__dirname, '../report.pdf');
+    const pdfPath = path.join(__dirname, '../../view/report.pdf');
     await page.pdf({ path: pdfPath, format: 'A4',printBackground: true });
     await browser.close();
 
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: 'alert.vamtec@gmail.com',
-          pass: 'mbmb chvd micr dwki'
-        }
-      });
+    const report_emails = await db.raw('select * from public.report_emails');
 
-      await transporter.sendMail({
+     let mailOptions = {
         from: 'alert.vamtec@gmail.com',
         to: 'madhanperumal1908@gmail.com',
+        cc: `${report_emails[0].emails}`,
         subject: 'Your PDF Report',
         text: 'Attached is your requested PDF report.',
         attachments: [{ filename: 'report.pdf', path: pdfPath }]
-      });
+      };
+    
+      // Send email and queue it
+      await emailQueue.sendEmail(mailOptions, user.id, 0, 'Service Report ', user.customerId);
+
+    // const transporter = nodemailer.createTransport({
+    //     service: 'gmail',
+    //     auth: {
+    //       user: 'alert.vamtec@gmail.com',
+    //       pass: 'mbmb chvd micr dwki'
+    //     }
+    //   });
+
+    //   await transporter.sendMail({
+    //     from: 'alert.vamtec@gmail.com',
+    //     to: 'madhanperumal1908@gmail.com',
+    //     subject: 'Your PDF Report',
+    //     text: 'Attached is your requested PDF report.',
+    //     attachments: [{ filename: 'report.pdf', path: pdfPath }]
+    //   });
   
       res.status(200).json({ message: 'Email with PDF sent!' ,'response': 'Success', 'CloseTickets': tickets });
   
@@ -45,7 +61,7 @@ const getReport = async (req, res) => {
     }
 }
 
-const getMailReport = async (id) => {
+const getMailReport = async (id,user) => {
     try {
     const tickets = await ticketModel.getReport(id);
     const ticket = tickets[0];
@@ -59,22 +75,34 @@ const getMailReport = async (id) => {
     await page.pdf({ path: pdfPath, format: 'A4',printBackground: true });
     await browser.close();
 
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: 'alert.vamtec@gmail.com',
-          pass: 'mbmb chvd micr dwki'
-        }
-      });
-
-      await transporter.sendMail({
+    let mailOptions = {
         from: 'alert.vamtec@gmail.com',
         to:  `${ticket.customer_email}`,
         cc: `${report_emails[0].emails},${ticket.assigned_by_email},${ticket.assigned_to_email}`,
-        subject: 'Sending the Service report Details',
-        text: `Service Report Details of Service Request ID :${ticket.sr_id}. `,
+        subject: 'Service Request PDF Report',
+        text: `Service Report Details of Completed Service Request ID :${ticket.sr_id}.`,
         attachments: [{ filename: 'report.pdf', path: pdfPath }]
-      });
+      };
+    
+      // Send email and queue it
+      await emailQueue.sendEmail(mailOptions, user.id, 0, 'Service Report ', user.customerId);
+
+    // const transporter = nodemailer.createTransport({
+    //     service: 'gmail',
+    //     auth: {
+    //       user: 'alert.vamtec@gmail.com',
+    //       pass: 'mbmb chvd micr dwki'
+    //     }
+    //   });
+
+    //   await transporter.sendMail({
+    //     from: 'alert.vamtec@gmail.com',
+    //     to:  `${ticket.customer_email}`,
+    //     cc: `${report_emails[0].emails},${ticket.assigned_by_email},${ticket.assigned_to_email}`,
+    //     subject: 'Sending the Service report Details',
+    //     text: `Service Report Details of Service Request ID :${ticket.sr_id}. `,
+    //     attachments: [{ filename: 'report.pdf', path: pdfPath }]
+    //   });
   
       return 'Success';
   

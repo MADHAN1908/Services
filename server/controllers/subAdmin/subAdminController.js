@@ -33,8 +33,6 @@ function decrypt(encryptedText, algorithm, secretKey) {
         return;
     }
 
-
-
     const user = req.user;
     const userTable = `public.users`;
     const saltRounds = 5;
@@ -113,14 +111,11 @@ const getCustomerContact = async (req, res) => {
     }
 }
 const getAssignUsers = async (req, res) => {
-    const userTable = `public.users`;
+    const user = req.user;
     const id = parseInt(req.params.id);
     const query = `SELECT userid,username FROM public.users   
- WHERE role = 'Employee' and active = '1'`;
-    // console.log(id);
+ WHERE role = 'Employee' and active = '1' and client_id = '${user.customerId}' `;
     const AssignUsers = await db.raw(query);
-    // const AssignUsers = await db.selectAll(userTable, '*', [`role = 'Employee'`,`active = '1'`],'AND');
-    // console.log(getCustomerContact);
     if (AssignUsers) {
         return res.status(200).json({ 'response': 'Success', 'AssignUsers': AssignUsers });
     }
@@ -132,7 +127,7 @@ const getAssignUsers = async (req, res) => {
 const getAssignedByUsers = async (req, res) => {
     const user = req.user;
     const query = `SELECT userid,username,role FROM public.users   
- WHERE role IN ('Employee','Manager','Admin') and active = '1'`;
+ WHERE role IN ('Employee','Manager','Admin') and active = '1' and client_id = '${user.customerId}'`;
     // console.log(id);
     const AssignedByUsers = await db.raw(query);
     // const AssignUsers = await db.selectAll(userTable, '*', [`role = 'Employee'`,`active = '1'`],'AND');

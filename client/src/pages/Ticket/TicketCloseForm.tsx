@@ -486,9 +486,7 @@ const TicketCloseForm = () => {
                 if(customerRating >0 && customerComment.trim() !== ''){
                     const response = await ticketService.updateTicket({'customer_rating':customerRating,'customer_comment':customerComment,'status':'C'},Number(formData.sr_id));
                     if(response.response == "Success"){
-                        // console.log(response.ticket);
-                        // console.log(response.ticket[0].customer_rating);
-                        // console.log(response.ticket[0].customer_comment);
+                       showToast(`Ticket No : ${response.ticket[0].sr_id} Completed Successfully`,'success');
                          setCustomerRating(Number(response.ticket[0].customer_rating));
                          setCustomerComment(response.ticket[0].customer_comment);
                      }
@@ -724,7 +722,7 @@ const TicketCloseForm = () => {
                                         <option value="">Choose Service Type</option>
                                         <option value="W">Warranty Call</option>
                                         <option value="B">Breakdown Call</option>
-                                        <option value="M">Maintance Call</option>
+                                        <option value="M">Maintenance Call</option>
                                     </select>
                                 </div>
                             
@@ -751,9 +749,12 @@ const TicketCloseForm = () => {
                                         className="form-select"
                                         disabled={editSR === false} >
                                         <option value="">Choose Assigned To</option>
-                                        {users.map((user) =>
-                                                 <option value={user.userid}>{user.username}</option>
+                                        {assignedByUsers.map((user) =>
+                                                 <option value={user.userid}>{user.username} ({user.role})</option>
                                                  )}
+                                        {/* {users.map((user) =>
+                                                 <option value={user.userid}>{user.username}</option>
+                                                 )} */}
                                     </select>
                                 </div>
                                 <div>

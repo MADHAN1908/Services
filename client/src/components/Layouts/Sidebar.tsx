@@ -467,7 +467,8 @@ const Sidebar = () => {
                                         <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Salutations')}</span>
                                     </div>
                                 </NavLink>
-                            </li>
+                            </li> */}
+                            { (role=='Admin')  && (
                             <li className="nav-item">
                                         <NavLink to="/mail-service" className="group">
                                             <div className="flex items-center">
@@ -491,9 +492,9 @@ const Sidebar = () => {
                                             </div>
                                         </NavLink>
                                     </li> 
-                          
+                            )}
 
-                             <li className="menu nav-item">
+                             {/* <li className="menu nav-item">
                                 <button type="button" className={`${currentMenu === 'contacts' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('contacts')}>
                                     <div className="flex items-center">
                                     <svg className="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -10,6 +10,8 @@ const cors = require('cors');
 const moment = require('moment');
 const ContactsImportQueue = require('./model/contactsImportQueue');
 const PORT = process.env.PORT || 3500;
+const emailQueue = require('./model/emailQueue');
+
 
 // Cross Origin Resource Sharing
 app.use(cors());
@@ -63,7 +65,7 @@ app.all('*', (req, res) => {
   const minutes = now.getMinutes();
   const seconds = now.getSeconds();
 
-  
+  await emailQueue.processEmails(); 
   await ContactsImportQueue.processImport();
 
   app.listen(PORT, () => {

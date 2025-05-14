@@ -10,6 +10,7 @@ const path = require('path');
 const DatabaseService = require('../../services/DatabaseService');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
+const nodemailer = require('nodemailer');
 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
@@ -171,29 +172,43 @@ const generateOTP = () => {
         charset: 'numeric'
     });
 };
+
 // Send OTP via email
 const sendOTP = async (req, res) => {
     const { email } = req.body;
     const usersTable = `public.users`;
 
-    
-
     try {
         // Fetch user data based on email
         let userData = await db.select(usersTable, '*', [`email ='${email}'`]);
-        if (userData.length <= 0) {
+        if ((userData && userData.length <= 0) || !userData ) {
             return res.status(401).json({ 'response': 'Failed', 'message': 'User not found' });
         }
-        const mailServiceTable = `user_${userData.client_id}.mail_services`;
+        // const mailServiceTable = `user_${userData.client_id}.mail_services`;
 
-        // Fetch mail service information
-        const service = await db.select(mailServiceTable, '*', [`user_id = ${userData.userid}`]);
-        if (!service || !service.email_verified_at) {
-            return res.status(402).json({ 'response': 'Failed', 'message': 'Mail configuration failed' });
-        }
+        // // Fetch mail service information
+        // const service = await db.select(mailServiceTable, '*', [`user_id = ${userData.userid}`]);
+        // if (!service || !service.email_verified_at) {
+        //     return res.status(402).json({ 'response': 'Failed', 'message': 'Mail configuration failed' });
+        // }
 
         // Generate OTP
         const otp = generateOTP();
+
+            // const transporter = nodemailer.createTransport({
+            //     service:process.env.LOCAL_MAIL_SERVICE,
+            //     auth: {
+            //       user: process.env.LOCAL_MAIL_USER,
+            //       pass: process.env.LOCAL_MAIL_PASSWORD
+            //     }
+            //   });
+        
+            //   await transporter.sendMail({
+            //     from:process.env.LOCAL_MAIL_USER,
+            //     to: userData.email,
+            //     subject: 'OTP for Login/Change Password',
+            //     html: `Your OTP is ${otp}. It will expire in 15 minutes.`
+            //   });
 
         // Create email options
         let mailOptions = {
@@ -221,6 +236,7 @@ const sendOTP = async (req, res) => {
     }
 
 };
+
 // Verify OTP via email
 const verifyOTP = async (req, res) => {
     const { email, token, otp } = req.body;

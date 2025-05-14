@@ -39,14 +39,14 @@ const AddTicket = () => {
     const [formData, setFormData] = useState<FormData>({
         company_id: '',
         contact_person: '',
-        MOC:'',
+        MOC:"E",
         sr_desc: '',
         sr_status: 'X',
         machine: '',
-        priority: '',
-        service_type: '',
+        priority: "M",
+        service_type: "M",
         reported_date: new Date(),
-        expected_date: '',
+        expected_date: new Date(),
     });
     // const userAuthDetail = JSON.parse(sessionStorage.getItem('user'))  ;
     const userAuthDetail = sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') as string) : null;
@@ -62,7 +62,7 @@ const AddTicket = () => {
             try {
                 if(role == "Customer"){
                     const response = await userService.getUser();
-                    console.log(response.UserDetails);
+                    // console.log(response.UserDetails);
                     setUser(response.UserDetails);
                     handleContactPerson(response.UserDetails.company_id);
                     setFormData({
@@ -249,14 +249,14 @@ const AddTicket = () => {
                             setFormData({
                                 company_id:'',
                                 contact_person:'',
-                                MOC:'',
+                                MOC:"E",
                                 sr_desc: '',
                                 sr_status: 'P',
                                 machine: '',
-                                priority: '',
-                                service_type: '',
+                                priority: "M",
+                                service_type:"M" ,
                                 reported_date:new Date(),
-                                expected_date:'',
+                                expected_date:new Date(),
                             });
                         }
                             setTableData([

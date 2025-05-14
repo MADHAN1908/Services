@@ -185,7 +185,7 @@ const updateTicket = async (req, res) => {
     
         if (updateTicket){
             if(UpdateArray.sr_status == 'C'){
-               const response = await reportController.getMailReport(id);
+               const response = await reportController.getMailReport(id,user);
                if(response == 'Success'){
                 return res.status(200).json({ 'response': 'Success','ticket':updateTicket });
                }else{

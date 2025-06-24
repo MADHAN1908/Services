@@ -11,17 +11,28 @@ import { Button, MultiSelect, Stack, ActionIcon,TextInput,LoadingOverlay , Box, 
 import { DatePicker, type DatesRangeValue } from '@mantine/dates';
 import dayjs from 'dayjs';
 
+interface Expense {
+    expense_id: number ,
+    sr_id: number ,
+    assigned_to_username : string,
+    category_name : string,
+    formatted_expense_date : string,
+    description :  string,
+    amount : number ,
+    attachments : string[],
+    [key: string]: unknown; 
+}
 const ExpenseList = () => {
     const dispatch = useDispatch();
-    const [items, setItems] = useState<any[]>([]);
+    const [items, setItems] = useState<Expense[]>([]);
     const [category, setCategory] = useState([]);
     const [loader, setLoader] = useState(false);
-    const [minSR_ID, setMinSR_ID] = useState<number | null>(null);
-    const [maxSR_ID, setMaxSR_ID] = useState<number | null>(null);
-    const [minExpense_id, setMinExpense_id] = useState<number | null>(null);
-    const [maxExpense_id, setMaxExpense_id] = useState<number | null>(null);
-    const [minAmount, setMinAmount] = useState<number | null>(null);
-    const [maxAmount, setMaxAmount] = useState<number | null>(null);
+    const [minSR_ID, setMinSR_ID] = useState<number | null | ''>(null);
+    const [maxSR_ID, setMaxSR_ID] = useState<number | null | ''>(null);
+    const [minExpense_id, setMinExpense_id] = useState<number | null | ''>(null);
+    const [maxExpense_id, setMaxExpense_id] = useState<number | null | ''>(null);
+    const [minAmount, setMinAmount] = useState<number | null | ''>(null);
+    const [maxAmount, setMaxAmount] = useState<number | null | ''>(null);
     const [users, setUsers] = useState([]);
     const navigate = useNavigate();
     const userAuthDetail = sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') as string) : null;
@@ -156,11 +167,11 @@ const ExpenseList = () => {
                         return false;
                 if (amountQuery !== '' && !expense.amount.toString().includes(amountQuery.toString()))
                     return false;
-                if (minSR_ID !== null && maxSR_ID !== '' && expense.sr_id < minSR_ID) return false;
+                if (minSR_ID !== null && maxSR_ID !== '' && expense.sr_id < Number(minSR_ID)) return false;
                 if (maxSR_ID !== null && maxSR_ID !== '' && expense.sr_id > maxSR_ID) return false;
-                if (minExpense_id !== null && maxExpense_id !== '' && expense.expense_id < minExpense_id) return false;
+                if (minExpense_id !== null && maxExpense_id !== '' && expense.expense_id < Number(minExpense_id)) return false;
                 if (maxExpense_id !== null && maxExpense_id !== '' && expense.expense_id > maxExpense_id) return false;
-                if (minAmount !== null && maxAmount  !== '' && expense.amount < minAmount ) return false;
+                if (minAmount !== null && maxAmount  !== '' && expense.amount < Number(minAmount) ) return false;
                 if (maxAmount  !== null && maxAmount  !== '' && expense.amount > maxAmount ) return false;
                 
                 return true;
@@ -217,7 +228,7 @@ const ExpenseList = () => {
                                 sortable: true,
                                 render: ({ expense_id }) => (
                                     <div className="flex items-center justify-center font-semibold">
-                                        <div>{expense_id}</div>
+                                        <div>{expense_id as number}</div>
                                     </div>
                                 ),
                                 filter: (
@@ -242,7 +253,7 @@ const ExpenseList = () => {
                                       rightSection={
                                         <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setExpense_idQuery('')}>
                                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                            stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                           <line x1="18" y1="6" x2="6" y2="18" />
                                           <line x1="6" y1="6" x2="18" y2="18" />
                                           </svg>
@@ -271,15 +282,19 @@ const ExpenseList = () => {
                                             <Box mr={12}>
                                             <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMinExpense_id('')}>
                                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                                stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                               <line x1="18" y1="6" x2="6" y2="18" />
                                               <line x1="6" y1="6" x2="18" y2="18" />
                                               </svg>
                                             </ActionIcon>
                                             </Box>
                                           }
-                                        value={minExpense_id}
-                                        onChange={setMinExpense_id}
+                                        value={minExpense_id !== null ? minExpense_id : undefined}
+                                        onChange={(value) => {
+                                            if (typeof value === "number" || value === "") {
+                                                setMinExpense_id(value);
+                                            }
+                                        }}
                                         style={{ flex: 1  }}
                                         // styles={{ input: { width: 60 } }}
                                       />
@@ -304,15 +319,19 @@ const ExpenseList = () => {
                                             <Box mr={12}>
                                             <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMaxExpense_id('')}>
                                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                                stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                               <line x1="18" y1="6" x2="6" y2="18" />
                                               <line x1="6" y1="6" x2="18" y2="18" />
                                               </svg>
                                             </ActionIcon>
                                             </Box>
                                           }
-                                        value={maxExpense_id}
-                                        onChange={setMaxExpense_id}
+                                        value={maxExpense_id !== null ? maxExpense_id : undefined}
+                                        onChange={(value) => {
+                                            if (typeof value === "number" || value === "") {
+                                                setMaxExpense_id(value);
+                                            }
+                                        }}
                                         style={{ flex: 1 }}
                                         // styles={{ input: { width: 60 } }}
                                       />
@@ -327,7 +346,7 @@ const ExpenseList = () => {
                                 sortable: true,
                                 render: ({ sr_id }) => (
                                     <div className="flex items-center justify-center font-semibold">
-                                        <div>{sr_id}</div>
+                                        <div>{sr_id as number}</div>
                                     </div>
                                 ),
                                 filter: (
@@ -352,7 +371,7 @@ const ExpenseList = () => {
                                       rightSection={
                                         <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setSR_IDQuery('')}>
                                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                            stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                           <line x1="18" y1="6" x2="6" y2="18" />
                                           <line x1="6" y1="6" x2="18" y2="18" />
                                           </svg>
@@ -381,15 +400,19 @@ const ExpenseList = () => {
                                             <Box mr={12}>
                                             <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMinSR_ID('')}>
                                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                                stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                               <line x1="18" y1="6" x2="6" y2="18" />
                                               <line x1="6" y1="6" x2="18" y2="18" />
                                               </svg>
                                             </ActionIcon>
                                             </Box>
                                           }
-                                        value={minSR_ID}
-                                        onChange={setMinSR_ID}
+                                        value={minSR_ID !== null ? minSR_ID : undefined}
+                                        onChange={(value) => {
+                                            if (typeof value === "number" || value === "") {
+                                                setMinSR_ID(value);
+                                            }
+                                        }}
                                         style={{ flex: 1  }}
                                         // styles={{ input: { width: 60 } }}
                                       />
@@ -414,15 +437,19 @@ const ExpenseList = () => {
                                             <Box mr={12}>
                                             <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMaxSR_ID('')}>
                                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                                stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                               <line x1="18" y1="6" x2="6" y2="18" />
                                               <line x1="6" y1="6" x2="18" y2="18" />
                                               </svg>
                                             </ActionIcon>
                                             </Box>
                                           }
-                                        value={maxSR_ID}
-                                        onChange={setMaxSR_ID}
+                                        value={maxSR_ID !== null ? maxSR_ID : undefined}
+                                        onChange={(value) => {
+                                            if (typeof value === "number" || value === "") {
+                                                setMaxSR_ID(value);
+                                            }
+                                        }}
                                         style={{ flex: 1 }}
                                         // styles={{ input: { width: 60 } }}
                                       />
@@ -435,7 +462,7 @@ const ExpenseList = () => {
                                 accessor: 'user',
                                 title:'UserName',
                                 sortable: false,
-                                render: ({ assigned_to_username }) => <div className="flex  justify-center font-semibold">{assigned_to_username}</div>,
+                                render: ({ assigned_to_username }) => <div className="flex  justify-center font-semibold">{assigned_to_username as string}</div>,
                                 filter: (
                                     <MultiSelect
                                         label="Filter by Users"
@@ -469,7 +496,7 @@ const ExpenseList = () => {
                                 accessor: 'expenses_type',
                                 title:'Expenses Type',
                                 sortable: false,
-                                render: ({ category_name }) => <div className="flex  justify-center font-semibold">{category_name}</div>,
+                                render: ({ category_name }) => <div className="flex  justify-center font-semibold">{category_name as string}</div>,
                                 filter: (
                                     <MultiSelect
                                         label="Filter by Expense Type"
@@ -505,7 +532,7 @@ const ExpenseList = () => {
                                 sortable: true,
                                 render: ({ formatted_expense_date }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{formatted_expense_date}</div>
+                                        <div>{formatted_expense_date as string}</div>
                                     </div>
                                 ),
                                 filter: ({ close }) => (
@@ -537,7 +564,7 @@ const ExpenseList = () => {
                                 sortable: false,
                                 render: ({ description }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{description}</div>
+                                        <div>{description as string}</div>
                                     </div>
                                 ),
                                 filter: (
@@ -561,7 +588,7 @@ const ExpenseList = () => {
                                       rightSection={
                                         <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setDescriptionQuery('')}>
                                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                            stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                           <line x1="18" y1="6" x2="6" y2="18" />
                                           <line x1="6" y1="6" x2="18" y2="18" />
                                           </svg>
@@ -577,7 +604,7 @@ const ExpenseList = () => {
                                 accessor: 'Amount',
                                 title: 'Amount',
                                 // sortable: true,
-                                render: ({ amount }) => <div className="font-semibold">{amount}</div>,
+                                render: ({ amount }) => <div className="font-semibold">{amount as number}</div>,
                                 filter: (<Box>
                                     <TextInput
                                       label="Amount"
@@ -599,7 +626,7 @@ const ExpenseList = () => {
                                       rightSection={
                                         <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setAmountQuery('')}>
                                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                            stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                           <line x1="18" y1="6" x2="6" y2="18" />
                                           <line x1="6" y1="6" x2="18" y2="18" />
                                           </svg>
@@ -628,15 +655,19 @@ const ExpenseList = () => {
                                             <Box mr={12}>
                                             <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMinAmount('')}>
                                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                                stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                               <line x1="18" y1="6" x2="6" y2="18" />
                                               <line x1="6" y1="6" x2="18" y2="18" />
                                               </svg>
                                             </ActionIcon>
                                             </Box>
                                           }
-                                        value={minAmount}
-                                        onChange={setMinAmount}
+                                        value={minAmount !== null ? minAmount : undefined}
+                                        onChange={(value) => {
+                                            if (typeof value === "number" || value === "") {
+                                                setMinAmount(value);
+                                            }
+                                        }}
                                         style={{ flex: 1  }}
                                         // styles={{ input: { width: 60 } }}
                                       />
@@ -661,15 +692,19 @@ const ExpenseList = () => {
                                             <Box mr={12}>
                                             <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMaxAmount('')}>
                                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                                stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                               <line x1="18" y1="6" x2="6" y2="18" />
                                               <line x1="6" y1="6" x2="18" y2="18" />
                                               </svg>
                                             </ActionIcon>
                                             </Box>
                                           }
-                                        value={maxAmount}
-                                        onChange={setMaxAmount}
+                                        value={maxAmount !== null ? maxAmount : undefined}
+                                        onChange={(value) => {
+                                            if (typeof value === "number" || value === "") {
+                                                setMaxAmount(value);
+                                            }
+                                        }}
                                         style={{ flex: 1 }}
                                         // styles={{ input: { width: 60 } }}
                                       />
@@ -682,9 +717,10 @@ const ExpenseList = () => {
                                 accessor: 'Attachments',
                                 title:'Attachments',
                                 sortable: true,
-                                render: ({ attachments }) => (<div className="font-semibold"> <ul>
-                                {attachments && attachments.length > 0 ? (
-                                  attachments.map((attachment, index) => (
+                                render: ({attachments}) => (
+                                <div className="font-semibold"> <ul>
+                                {attachments && Array.isArray(attachments) ? (
+                                  attachments.map((attachment : string, index : number) => (
                                     <li><a className="text-blue-500 cursor-pointer " onClick={() => handlePreview(attachment)}>Attachment {index + 1}</a></li>
                                   ))
                                 ) : (

@@ -468,7 +468,7 @@ const Sidebar = () => {
                                     </div>
                                 </NavLink>
                             </li> */}
-                            { (role=='Admin')  && (
+                            {/* { (role=='Admin')  && (
                             <li className="nav-item">
                                         <NavLink to="/mail-service" className="group">
                                             <div className="flex items-center">
@@ -492,7 +492,7 @@ const Sidebar = () => {
                                             </div>
                                         </NavLink>
                                     </li> 
-                            )}
+                            )} */}
 
                              {/* <li className="menu nav-item">
                                 <button type="button" className={`${currentMenu === 'contacts' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('contacts')}>

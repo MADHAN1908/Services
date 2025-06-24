@@ -6,7 +6,7 @@ table > thead > tr > th.mantine-187dsit {
     background-color: rgb(224 230 237 / 0.3);
 }
 .datatables table tbody tr {
-    @apply bg-white dark:!border-[#191e3a] dark:bg-black;
+    @apply bg-white-light dark:!border-[#191e3a] dark:bg-black;
 }
 
 .datatables table tr.mantine-1ublbff.mantine-1ublbff {
@@ -15,20 +15,33 @@ table > thead > tr > th.mantine-187dsit {
  /* .datatables table tbody tr td {
     @apply !border-0 !border-none;
 }  */
-  .datatables table thead th {
+  /* .datatables table thead th {
     @apply !border-0 !border-none;
-} 
+}  */
 table tr .mantine-Checkbox-root {
     @apply flex;
 }
-.datatables table thead tr th {
+/* .datatables table thead tr th {
     @apply !border-b-0 !bg-white-light/30  text-black dark:!bg-[#1a2941] dark:!text-white-dark;
-}
+} */
 
 .datatables .table-bordered table thead tr th,
 .datatables .table-bordered table tbody tr td {
     @apply !border !border-solid !border-[#f6f7fa] dark:!border-[#191e3a];
 }
+/* .datatables table thead tr th, */
+.datatables table tbody tr td {
+    @apply !border !border-solid !border-[#2d3752] dark:!border-[#c9cee8];
+}
+
+.datatables table thead tr th {
+    @apply !border !border-2 !border-[#1b2131] dark:!border-[#c9cee8];
+}
+
+/* .datatables table tfoot tr th,
+.datatables table tfoot tr td {
+    @apply bg-white-light/30 text-black dark:bg-[#1a2941] dark:text-white-dark;
+} */
 
 .datatables .table-compact table thead tr th,
 .datatables .table-compact table tbody tr td {

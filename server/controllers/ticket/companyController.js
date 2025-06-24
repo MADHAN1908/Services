@@ -4,10 +4,10 @@ const companyModel = require('../../model/companyModel');
 const createCompany = async (req, res) => {
     try {
         const user = req.user;
-        console.log(req.body);
+        // console.log(req.body);
 
         const existingCompany = await companyModel.findCompanyByName(req.body);
-        console.log(existingCompany);
+        // console.log(existingCompany);
         if (existingCompany) {
             return res.status(400).json({ response: 'Error', message: 'Company Name or Email or Phone Number already exists' });
         }

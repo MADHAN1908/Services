@@ -5,9 +5,9 @@ const createExpense = async (req, res) => {
  const user = req.user;
 let expenseDate = new Date(req.body.expense_date);
   let formattedDate = expenseDate.toLocaleDateString('en-CA');
-console.log(formattedDate);
+// console.log(formattedDate);
  const filePaths = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
- console.log(req.body);
+//  console.log(req.body);
     const newExpense = {
         sr_id: req.body.sr_id,
         expense_type: req.body.expense_type,

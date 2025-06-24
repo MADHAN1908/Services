@@ -19,7 +19,7 @@ const getAllExpenses = async (user) => {
           FROM service.ticket 
           WHERE ${user.role == "Manager" ? `assigned_by = ${user.id}` : `assigned_to = ${user.id}` }
         `);
-        console.log(Tickets);
+        // console.log(Tickets);
         const ticketRows = Array.isArray(Tickets[0]) ? Tickets[0] : Tickets;
         ticketIds = ticketRows.map(row => row.sr_id);
         console.log(ticketIds);

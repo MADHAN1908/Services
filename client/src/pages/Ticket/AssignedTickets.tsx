@@ -301,7 +301,7 @@ const AssignedTicket = () => {
                                       rightSection={
                                         <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setSR_IDQuery('')}>
                                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                            stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                           <line x1="18" y1="6" x2="6" y2="18" />
                                           <line x1="6" y1="6" x2="18" y2="18" />
                                           </svg>
@@ -330,7 +330,7 @@ const AssignedTicket = () => {
                                             <Box mr={12}>
                                             <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMinSR_ID('')}>
                                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                                stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                               <line x1="18" y1="6" x2="6" y2="18" />
                                               <line x1="6" y1="6" x2="18" y2="18" />
                                               </svg>
@@ -363,7 +363,7 @@ const AssignedTicket = () => {
                                             <Box mr={12}>
                                             <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMaxSR_ID('')}>
                                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                                stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                               <line x1="18" y1="6" x2="6" y2="18" />
                                               <line x1="6" y1="6" x2="18" y2="18" />
                                               </svg>
@@ -471,7 +471,7 @@ const AssignedTicket = () => {
                                       rightSection={
                                         <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setSRQuery('')}>
                                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                            stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                           <line x1="18" y1="6" x2="6" y2="18" />
                                           <line x1="6" y1="6" x2="18" y2="18" />
                                           </svg>
@@ -509,7 +509,7 @@ const AssignedTicket = () => {
                                       rightSection={
                                         <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMachineQuery('')}>
                                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                            stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                           <line x1="18" y1="6" x2="6" y2="18" />
                                           <line x1="6" y1="6" x2="18" y2="18" />
                                           </svg>
@@ -557,7 +557,7 @@ const AssignedTicket = () => {
                             {
                                 accessor: 'Status',
                                 sortable: true,
-                                render: ({ sr_status, id }) => (
+                                render: ({ sr_status }) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{getStatus(sr_status)}</div>
                                     </div>
@@ -594,7 +594,7 @@ const AssignedTicket = () => {
                             ...(role !== 'Employee' ? [{
                                 accessor: 'Assigned To',
                                 sortable: false,
-                                render: ({ assigned_to_name }) => (
+                                render: ({ assigned_to_name }: {assigned_to_name : string}) => (
                                     <div className="flex items-center justify-center font-semibold">
                                         <div>{assigned_to_name}</div>
                                     </div>

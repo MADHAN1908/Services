@@ -4,10 +4,10 @@ const categoryModel = require('../../model/categoryModel');
 const createCategory = async (req, res) => {
     try {
         const user = req.user;
-        console.log(req.body);
+        // console.log(req.body);
 
         const existingCategory = await categoryModel.findCategoryByName(req.body.name);
-        console.log(existingCategory);
+        // console.log(existingCategory);
         if (existingCategory) {
             return res.status(400).json({ response: 'Error', message: 'Category already exists' });
         }

@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { DataTable, DataTableSortStatus } from 'mantine-datatable';
+import { DataTable, DataTableSortStatus,DataTableColumn } from 'mantine-datatable';
 import { useState, useEffect } from 'react';
 import { ticketService } from '../../services/ticketService';
 import { userService } from '../../services/userService';
@@ -11,6 +11,20 @@ import { Button, MultiSelect, Stack, ActionIcon, TextInput,LoadingOverlay, Numbe
 import { DatePicker, type DatesRangeValue } from '@mantine/dates';
 
 import dayjs from 'dayjs';
+ interface VisibleColumns{
+        sr_id: boolean,
+        sr_date: boolean,
+        requested_by:boolean,
+        service_request:boolean,
+        machine : boolean,
+        priority: boolean,
+        status: boolean,
+        service_type: boolean,
+        assigned_to : boolean,
+        assigned_by : boolean,
+        rating : boolean,
+      }
+    
 
 const TicketList = () => {
     const dispatch = useDispatch();
@@ -19,10 +33,10 @@ const TicketList = () => {
     const [employees, setEmployees] = useState([]);
     const [managers, setManagers] = useState([]);
     const [loader, setLoader] = useState(false);
-    const [minSR_ID, setMinSR_ID] = useState<number | null>(null);
-    const [maxSR_ID, setMaxSR_ID] = useState<number | null>(null);
+    const [minSR_ID, setMinSR_ID] = useState<number | null| ''>(null);
+    const [maxSR_ID, setMaxSR_ID] = useState<number | null | ''>(null);
 
-    const [visibleColumns, setVisibleColumns] = useState({
+    const [visibleColumns, setVisibleColumns] = useState<VisibleColumns>({
         sr_id: true,
         sr_date: true,
         requested_by:true,
@@ -88,8 +102,8 @@ const TicketList = () => {
     const [selectedRecords, setSelectedRecords] = useState<any>([]);
 
     const [search, setSearch] = useState('');
-    const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
-        columnAccessor: 'username',
+    const [sortStatus, setSortStatus] = useState<DataTableSortStatus<{sr_id : number}>>({
+        columnAccessor: 'sr_id',
         direction: 'asc',
     });
     const [selectedPriority,setSelectedPriority] = useState<string[]>([]);
@@ -202,11 +216,6 @@ const TicketList = () => {
                         className="whitespace-nowrap "
                         withColumnBorders
                         withTableBorder
-                        // pinFirstColumn
-                        // noHeader
-                        // height={450}
-                        // borderColor="#d0d4da"
-                        // rowBorderColor="#d0d4da"
                         records={records}
                         columns={
                             [
@@ -216,7 +225,7 @@ const TicketList = () => {
                                 sortable: false,
                                 textAlign: 'center',
                                 // width:80,
-                                render: ({ sr_id }) => (
+                                render: ({ sr_id }: { sr_id: number }) => (
                                     <div className="flex gap-4 items-center w-max mx-auto">
                                         <NavLink to={`/sr/solution/view/${sr_id}`} className="flex hover:text-info">
                                         <svg
@@ -240,7 +249,7 @@ const TicketList = () => {
                                 filter :(<Box mb={16}>
                                     <Text fw={700} mb={8}>Visible Columns</Text>
                                   
-                                    {Object.keys(visibleColumns).map((columnKey) => (<div className="flex gap-2">
+                                    {(Object.keys(visibleColumns) as (keyof VisibleColumns)[]).map((columnKey) => (<div className="flex gap-2">
                                       <Checkbox
                                         key={columnKey}
                                         className="flex"
@@ -262,7 +271,7 @@ const TicketList = () => {
                                 accessor: 'ticketID',
                                 title:'SR ID',
                                 sortable: true,
-                                render: ({ sr_id }) => (
+                                render: ({ sr_id }: { sr_id: number }) => (
                                     <div className="flex items-center justify-center font-semibold">
                                         <div>{sr_id}</div>
                                     </div>
@@ -288,7 +297,7 @@ const TicketList = () => {
                                       rightSection={
                                         <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setSR_IDQuery('')}>
                                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                            stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                           <line x1="18" y1="6" x2="6" y2="18" />
                                           <line x1="6" y1="6" x2="18" y2="18" />
                                           </svg>
@@ -317,15 +326,19 @@ const TicketList = () => {
                                             <Box mr={12}>
                                             <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMinSR_ID('')}>
                                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                                stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                               <line x1="18" y1="6" x2="6" y2="18" />
                                               <line x1="6" y1="6" x2="18" y2="18" />
                                               </svg>
                                             </ActionIcon>
                                             </Box>
                                           }
-                                        value={minSR_ID}
-                                        onChange={setMinSR_ID}
+                                        value={minSR_ID !== null ? minSR_ID : undefined}
+                                        onChange={(value) => {
+                                            if (typeof value === "number" || value === "") {
+                                                setMinSR_ID(value);
+                                            }
+                                        }}
                                         style={{ flex: 1  }}
                                         // styles={{ input: { width: 60 } }}
                                       />
@@ -350,15 +363,19 @@ const TicketList = () => {
                                             <Box mr={12}>
                                             <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMaxSR_ID('')}>
                                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                                stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                               <line x1="18" y1="6" x2="6" y2="18" />
                                               <line x1="6" y1="6" x2="18" y2="18" />
                                               </svg>
                                             </ActionIcon>
                                             </Box>
                                           }
-                                        value={maxSR_ID}
-                                        onChange={setMaxSR_ID}
+                                        value={maxSR_ID !== null ? maxSR_ID : undefined}
+                                        onChange={(value) => {
+                                            if (typeof value === "number" || value === "") {
+                                                setMaxSR_ID(value);
+                                            }
+                                        }}
                                         style={{ flex: 1 }}
                                         // styles={{ input: { width: 60 } }}
                                       />
@@ -371,12 +388,12 @@ const TicketList = () => {
                                 accessor: 'Date',
                                 title:'SR Date',
                                 sortable: false,
-                                render: ({ srf_date }) => (
+                                render: ({ srf_date }: {srf_date : string}) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{srf_date}</div>
                                     </div>
                                 ),
-                                filter: ({ close }) => (
+                                filter: ({ close }: { close: () => void }) => (
                                     <Stack>
                                       <DatePicker
                                         maxDate={new Date()}
@@ -403,7 +420,7 @@ const TicketList = () => {
                                 accessor: 'Requested By',
                                 title:'Requested By',
                                 sortable: false,
-                                render: ({ contact_person_name }) => (
+                                render: ({ contact_person_name }:{contact_person_name : string}) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{contact_person_name}</div>
                                     </div>
@@ -440,7 +457,7 @@ const TicketList = () => {
                             visibleColumns.service_request && {
                                 accessor: 'Service Request',
                                 sortable: false,
-                                render: ({ sr_desc }) => (
+                                render: ({ sr_desc }:{sr_desc : string}) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{ sr_desc }</div>
                                     </div>
@@ -466,7 +483,7 @@ const TicketList = () => {
                                       rightSection={
                                         <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setSRQuery('')}>
                                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                            stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                           <line x1="18" y1="6" x2="6" y2="18" />
                                           <line x1="6" y1="6" x2="18" y2="18" />
                                           </svg>
@@ -482,7 +499,7 @@ const TicketList = () => {
                            visibleColumns.machine && {
                                 accessor: 'Machine',
                                 sortable: false,
-                                render: ({ machine }) => (
+                                render: ({ machine } : {machine : string}) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{ machine }</div>
                                     </div>
@@ -508,7 +525,7 @@ const TicketList = () => {
                                       rightSection={
                                         <ActionIcon size="sm" variant="transparent" c="dimmed" onClick={() => setMachineQuery('')}>
                                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" 
-                                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                            stroke-linecap="round" stroke-linejoin="round" className="feather feather-x">
                                           <line x1="18" y1="6" x2="6" y2="18" />
                                           <line x1="6" y1="6" x2="18" y2="18" />
                                           </svg>
@@ -523,7 +540,7 @@ const TicketList = () => {
                             visibleColumns.priority && {
                                 accessor: 'Priority',
                                 sortable: false,
-                                render: ({ priority}) => (
+                                render: ({ priority} : {priority : string}) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{getPriorty(priority)}</div>
                                     </div>
@@ -560,7 +577,7 @@ const TicketList = () => {
                             visibleColumns.status && {
                                 accessor: 'Status',
                                 sortable: false,
-                                render: ({ sr_status }) => (
+                                render: ({ sr_status } : {sr_status : string}) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{getStatus(sr_status)}</div>
                                     </div>
@@ -598,7 +615,7 @@ const TicketList = () => {
                            visibleColumns.service_type && {
                                 accessor: 'Service Type',
                                 sortable: false,
-                                render: ({ service_type }) => (
+                                render: ({ service_type } : {service_type : string}) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{getServiceType(service_type)}</div>
                                     </div>
@@ -635,7 +652,7 @@ const TicketList = () => {
                             visibleColumns.assigned_to && {
                                 accessor: 'Assigned To',
                                 sortable: false,
-                                render: ({ assigned_to_name }) => (
+                                render: ({ assigned_to_name } : {assigned_to_name : string}) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{assigned_to_name?assigned_to_name:'Not Assigned'}</div>
                                     </div>
@@ -672,7 +689,7 @@ const TicketList = () => {
                             visibleColumns.assigned_by && {
                                 accessor: 'Assigned By',
                                 sortable: false,
-                                render: ({ assigned_by_name }) => (
+                                render: ({ assigned_by_name }: {assigned_by_name: string}) => (
                                     <div className="flex items-center font-semibold">
                                         <div>{assigned_by_name}</div>
                                     </div>
@@ -709,14 +726,14 @@ const TicketList = () => {
                             visibleColumns.rating && {
                                 accessor: 'Rating',
                                 sortable: false,
-                                render: ({ customer_rating }) => (
+                                render: ({ customer_rating }: {customer_rating : number}) => (
                                     <div className="flex items-center justify-center font-semibold">
                                         <div>{customer_rating}</div>
                                     </div>
                                 ),
                             },
                             
-                        ].filter(Boolean)}
+                        ].filter(Boolean) as DataTableColumn<{ sr_id: number }>[]}
                         highlightOnHover
                         totalRecords={initialRecords.length}
                         recordsPerPage={pageSize}

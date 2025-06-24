@@ -31,7 +31,7 @@ const Edit = () => {
     });
     const GetCategory = async () => {
         try {
-            const response = await categoryService.getCategory(id);
+            const response = await categoryService.getCategory(Number(id));
             const category = response.Category;
             setFormData({
                 category_id:category.category_id,

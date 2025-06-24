@@ -182,7 +182,7 @@ const TicketList = () => {
                                 sortable: true,
                                 render: ({ category_id }) => (
                                     <div className="flex items-center justify-center font-semibold">
-                                        <div>{category_id}</div>
+                                        <div>{category_id as number}</div>
                                     </div>
                                 ),
                             },
@@ -192,7 +192,7 @@ const TicketList = () => {
                                 sortable: true,
                                 render: ({ name }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{name}</div>
+                                        <div>{name as string}</div>
                                     </div>
                                 ),
                             },

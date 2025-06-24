@@ -126,8 +126,9 @@ const CompanyList = () => {
         <LoadingOverlay visible={loader} loaderProps={{ children: 'Loading...' }} />
     }
                     <DataTable
-                        className="whitespace-nowrap table-hover"
+                        className="whitespace-nowrap"
                         withColumnBorders
+                        withTableBorder
                         borderColor="#d0d4da"
                         rowBorderColor="#d0d4da"
                         records={records}
@@ -136,7 +137,7 @@ const CompanyList = () => {
                                 accessor: 'action',
                                 title: 'Actions',
                                 sortable: false,
-                                textAlignment: 'center',
+                                textAlign: 'center',
                                 render: ({ company_id }) => (
                                     <div className="flex gap-4 items-center w-max mx-auto">
                                         <NavLink to={`/company/edit/${ company_id }`} className="flex hover:text-info">
@@ -191,7 +192,7 @@ const CompanyList = () => {
                                 sortable: true,
                                 render: ({  company_id }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{company_id}</div>
+                                        <div>{company_id as number}</div>
                                     </div>
                                 ),
                             },
@@ -201,7 +202,7 @@ const CompanyList = () => {
                                 sortable: true,
                                 render: ({ company_name}) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{company_name}</div>
+                                        <div>{company_name as string}</div>
                                     </div>
                                 ),
                             },
@@ -210,7 +211,7 @@ const CompanyList = () => {
                                 sortable: true,
                                 render: ({ email }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{email}</div>
+                                        <div>{email as string}</div>
                                     </div>
                                 ),
                             },
@@ -219,7 +220,7 @@ const CompanyList = () => {
                                 sortable: true,
                                 render: ({ phone_no}) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{phone_no}</div>
+                                        <div>{phone_no as string}</div>
                                     </div>
                                 ),
                             },
@@ -228,7 +229,7 @@ const CompanyList = () => {
                                 sortable: true,
                                 render: ({ address }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{address}</div>
+                                        <div>{address as string}</div>
                                     </div>
                                 ),
                             },
@@ -237,7 +238,7 @@ const CompanyList = () => {
                                 sortable: true,
                                 render: ({ city  }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{city}</div>
+                                        <div>{city as string}</div>
                                     </div>
                                 ),
                             },
@@ -246,7 +247,7 @@ const CompanyList = () => {
                                 sortable: true,
                                 render: ({ state }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{state}</div>
+                                        <div>{state as string}</div>
                                     </div>
                                 ),
                             },
@@ -255,7 +256,7 @@ const CompanyList = () => {
                                 sortable: true,
                                 render: ({ country }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{country}</div>
+                                        <div>{country as string}</div>
                                     </div>
                                 ),
                             },
@@ -265,7 +266,7 @@ const CompanyList = () => {
                                 sortable: true,
                                 render: ({ postal_code }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{postal_code}</div>
+                                        <div>{postal_code as string}</div>
                                     </div>
                                 ),
                             },

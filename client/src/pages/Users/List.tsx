@@ -9,11 +9,21 @@ import { userService } from '../../services/userService';
 import Swal from 'sweetalert2';
 import { parse } from 'cookie';
 
+interface User {
+    userid: number,
+    username : string,
+    email : string,
+    mobile : string,
+    role :  string,
+    active : string,
+    [key: string]: unknown; 
+}
 const List = () => {
     const dispatch = useDispatch();
-    const [items, setItems] = useState([]);
+    const [items, setItems] = useState<User[]>([]);
     const navigate = useNavigate();
-    const userAuthDetail = JSON.parse(sessionStorage.getItem('user'));
+    const userAuthDetail = sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') as string) : null;
+    // const userAuthDetail = JSON.parse(sessionStorage.getItem('user'));
     const role = userAuthDetail?.role?userAuthDetail.role:'Manage';
     useEffect(() => {
         if(!userAuthDetail.token || role =='Manage'){
@@ -72,7 +82,7 @@ const List = () => {
                 const ids = selectedRows.map((d: any) => {
                     return d.id;
                 });
-                const result = items.filter((d) => !ids.includes(d.id as never));
+                const result = items.filter((d) => !ids.includes(d.userid));
                 setRecords(result);
                 setInitialRecords(result);
                 setItems(result);
@@ -157,7 +167,7 @@ const List = () => {
                                 accessor: 'action',
                                 title: 'Actions',
                                 sortable: false,
-                                textAlignment: 'center',
+                                textAlign: 'center',
                                 render: ({ userid }) => (
                                     <div className="flex gap-4 items-center w-max mx-auto">
                                         <NavLink to={`/users/edit/${ userid }`} className="flex hover:text-info">
@@ -209,36 +219,36 @@ const List = () => {
                             {
                                 accessor: 'username',
                                 sortable: true,
-                                render: ({ username, id }) => (
+                                render: ({ username }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{username}</div>
+                                        <div>{username as string}</div>
                                     </div>
                                 ),
                             },
                             {
                                 accessor: 'email',
                                 sortable: true,
-                                render: ({ email, id }) => (
+                                render: ({ email }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{email}</div>
+                                        <div>{email as string}</div>
                                     </div>
                                 ),
                             },
                             {
                                 accessor: 'mobile',
                                 sortable: true,
-                                render: ({ mobile, id }) => (
+                                render: ({ mobile }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{mobile}</div>
+                                        <div>{mobile as string}</div>
                                     </div>
                                 ),
                             },
                             {
                                 accessor: 'role',
                                 sortable: true,
-                                render: ({ role, id }) => (
+                                render: ({ role }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{role}</div>
+                                        <div>{role as string}</div>
                                     </div>
                                 ),
                             },

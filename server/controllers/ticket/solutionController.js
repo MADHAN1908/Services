@@ -124,7 +124,7 @@ const updateSolution = async (req, res) => {
 const uploadAttachment = async (req, res) => {
     const id = parseInt(req.params.id);
     const updateSolution = {};
-    console.log(req.body);
+    // console.log(req.body);
     if (req.body.before_attachment_upload){
     const existingPhotos = req.body.before_attachments ? (Array.isArray(req.body.before_attachments) ? req.body.before_attachments : [req.body.before_attachments]) : [];
     const uploadedFile = req.file ? `/uploads/${req.file.filename}` : null;
@@ -147,7 +147,7 @@ const uploadAttachment = async (req, res) => {
 
 const deleteAttachment = async (req, res) => {
     const id = parseInt(req.params.id);
-    console.log(req.body);
+    // console.log(req.body);
     const updateSolution = {};
     if (req.body.field == "before_attachments"){
         updateSolution.before_attachments = JSON.stringify(req.body.updatedAttachments ?  req.body.updatedAttachments  : []); 
@@ -156,7 +156,7 @@ const deleteAttachment = async (req, res) => {
         updateSolution.after_attachments = JSON.stringify(req.body.updatedAttachments ?  req.body.updatedAttachments : []);
     }
         const filePath = path.join(__dirname, "../../uploads", path.basename(req.body.image_path));
-        console.log("Attempting to delete:", filePath);
+        // console.log("Attempting to delete:", filePath);
         if (fs.existsSync(filePath)) {
             console.log(1);
             fs.unlinkSync(filePath); 

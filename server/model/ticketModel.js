@@ -10,9 +10,9 @@ const createTicket = async (data) => {
 const getTicket = async (id) => {
     const query = `SELECT t.*,
     TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date,
-    TO_CHAR(t.plan_in_time, 'DD-MON-YYYY HH:MI') AS plan_in_date,
-    TO_CHAR(t.act_in_time, 'DD-MON-YYYY HH:MI') AS act_in_date,
-    TO_CHAR(t.act_out_time, 'DD-MON-YYYY HH:MI') AS act_out_date,
+    TO_CHAR(t.plan_in_time, 'DD-MON-YYYY HH24:MI') AS plan_in_date,
+    TO_CHAR(t.act_in_time, 'DD-MON-YYYY HH24:MI') AS act_in_date,
+    TO_CHAR(t.act_out_time, 'DD-MON-YYYY HH24:MI') AS act_out_date,
      u.username as contact_person_name FROM service.ticket AS t
  INNER JOIN public.users AS u ON t.contact_person = u.userid
  Where t.sr_id = ${id}`;
@@ -69,7 +69,7 @@ const getAssignTickets = async () => {
 const getAssignedTickets = async (id,role) => {
     let query;
     if(role == "Admin"){
-        query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date ,TO_CHAR(t.plan_in_time, 'DD-MON-YYYY HH:MM') AS plan_in_date, u.username as contact_person_name,
+        query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date ,TO_CHAR(t.plan_in_time, 'DD-MON-YYYY HH24:MI') AS plan_in_date, u.username as contact_person_name,
         a.username as assigned_to_name,m.username as assigned_by_name FROM service.ticket AS t
  LEFT JOIN public.users AS u ON t.contact_person = u.userid 
  LEFT JOIN public.users AS a ON t.assigned_to = a.userid
@@ -82,7 +82,7 @@ const getAssignedTickets = async (id,role) => {
  ORDER BY reported_date DESC`;
     }else if(role == "Manager"){
         // console.log(id,role);
-        query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name,
+        query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date ,TO_CHAR(t.plan_in_time, 'DD-MON-YYYY HH24:MI') AS plan_in_date, u.username as contact_person_name,
         a.username as assigned_to_name,m.username as assigned_by_name FROM service.ticket AS t
     LEFT JOIN public.users AS u ON t.contact_person = u.userid
     LEFT JOIN public.users AS a ON t.assigned_to = a.userid
@@ -94,7 +94,7 @@ const getAssignedTickets = async (id,role) => {
     )
          ORDER BY reported_date DESC`;
        }else{
-     query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date, u.username as contact_person_name,
+     query = `SELECT t.*,TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date ,TO_CHAR(t.plan_in_time, 'DD-MON-YYYY HH24:MI') AS plan_in_date, u.username as contact_person_name,
      a.username as assigned_to_name,m.username as assigned_by_name FROM service.ticket AS t
  LEFT JOIN public.users AS u ON t.contact_person = u.userid
  LEFT JOIN public.users AS a ON t.assigned_to = a.userid
@@ -117,10 +117,10 @@ const getCloseTickets = async (id,role) => {
         query = `SELECT 
     t.*,
     TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date,
-    TO_CHAR(t.act_in_time, 'DD-MON-YYYY HH:MI') AS actf_in_time,
-    TO_CHAR(t.act_out_time, 'DD-MON-YYYY HH:MI') AS actf_out_time,
-    TO_CHAR(t.customer_in_time, 'DD-MON-YYYY HH:MI') AS customerf_in_time,
-    TO_CHAR(t.customer_out_time, 'DD-MON-YYYY HH:MI') AS customerf_out_time,
+    TO_CHAR(t.act_in_time, 'DD-MON-YYYY HH24:MI') AS actf_in_time,
+    TO_CHAR(t.act_out_time, 'DD-MON-YYYY HH24:MI') AS actf_out_time,
+    TO_CHAR(t.customer_in_time, 'DD-MON-YYYY HH24:MI') AS customerf_in_time,
+    TO_CHAR(t.customer_out_time, 'DD-MON-YYYY HH24:MI') AS customerf_out_time,
     a.username AS assigned_to_name,
 	u.username AS contact_person_name,
 	c.company_name,
@@ -165,10 +165,10 @@ const getReport = async (id) => {
        const query = `SELECT 
     t.*,
     TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date,
-    TO_CHAR(t.act_in_time, 'DD-MON-YYYY HH:MI') AS actf_in_time,
-    TO_CHAR(t.act_out_time, 'DD-MON-YYYY HH:MI') AS actf_out_time,
-    TO_CHAR(t.customer_in_time, 'DD-MON-YYYY HH:MI') AS customerf_in_time,
-    TO_CHAR(t.customer_out_time, 'DD-MON-YYYY HH:MI') AS customerf_out_time,
+    TO_CHAR(t.act_in_time, 'DD-MON-YYYY HH24:MI') AS actf_in_time,
+    TO_CHAR(t.act_out_time, 'DD-MON-YYYY HH24:MI') AS actf_out_time,
+    TO_CHAR(t.customer_in_time, 'DD-MON-YYYY HH24:MI') AS customerf_in_time,
+    TO_CHAR(t.customer_out_time, 'DD-MON-YYYY HH24:MI') AS customerf_out_time,
     a.username AS assigned_to_name,
     a.email AS assigned_to_email,
     m.email AS assigned_by_email,
@@ -208,10 +208,10 @@ const getTicketsReport = async (data,user) => {
         query = `SELECT 
     t.*,
     TO_CHAR(t.sr_date, 'DD-MON-YYYY') AS srf_date,
-    TO_CHAR(t.act_in_time, 'DD-MON-YYYY HH:MI') AS actf_in_time,
-    TO_CHAR(t.act_out_time, 'DD-MON-YYYY HH:MI') AS actf_out_time,
-    TO_CHAR(t.customer_in_time, 'DD-MON-YYYY HH:MI') AS customerf_in_time,
-    TO_CHAR(t.customer_out_time, 'DD-MON-YYYY HH:MI') AS customerf_out_time,
+    TO_CHAR(t.act_in_time, 'DD-MON-YYYY HH24:MI') AS actf_in_time,
+    TO_CHAR(t.act_out_time, 'DD-MON-YYYY HH24:MI') AS actf_out_time,
+    TO_CHAR(t.customer_in_time, 'DD-MON-YYYY HH24:MI') AS customerf_in_time,
+    TO_CHAR(t.customer_out_time, 'DD-MON-YYYY HH24:MI') AS customerf_out_time,
     a.username AS assigned_to_name,
 	u.username AS contact_person_name,
 	c.company_name,

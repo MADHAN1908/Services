@@ -7,6 +7,7 @@ const path = require("path");
   const createSolution = async (req, res) => {
     const user = req.user;
     const id = parseInt(req.params.id);
+    console.log(req.body);
     const filePaths = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
     const newSolution = {
         sr_id: id,
@@ -16,6 +17,7 @@ const path = require("path");
     }
     const results = await solutionModel.createSolution(newSolution);
         if(results){
+        console.log(results);    
         return res.status(200).json({ 'response': 'Success' });
         }else{
             return res.status(400).json({ 'response': 'Failure', "message": 'error in creating' });
@@ -67,6 +69,17 @@ const getTicketSolutions = async (req, res) => {
     const ticketSolutions = await solutionModel.getTicketSolutions(id);
     if (ticketSolutions) {
         return res.status(200).json({ 'response': 'Success', 'TicketSolutions': ticketSolutions });
+    }
+    else {
+        return res.status(400).json({ 'response': 'Success', "message": 'Not found' });
+    }
+}
+
+const getSolution = async (req, res) => {
+    const id = parseInt(req.params.id);
+    const Solution = await solutionModel.getSolution(id);
+    if (Solution) {
+        return res.status(200).json({ 'response': 'Success', 'Solution': Solution });
     }
     else {
         return res.status(400).json({ 'response': 'Success', "message": 'Not found' });
@@ -135,7 +148,19 @@ const uploadAttachment = async (req, res) => {
         const existingPhotos = req.body.after_attachments ? (Array.isArray(req.body.after_attachments) ? req.body.after_attachments : [req.body.after_attachments]) : [];
         const uploadedFile = req.file ? `/uploads/${req.file.filename}` : null;
         updateSolution.after_attachments = JSON.stringify(uploadedFile ? [...existingPhotos, uploadedFile] : existingPhotos); 
-        }
+    }
+
+    if (req.body.flutter_before_attachment_upload){
+    const existingPhotos = req.body.before_attachments ? JSON.parse(req.body.before_attachments) : [];
+    const uploadedFile = req.file ? `/uploads/${req.file.filename}` : null;
+    console.log(existingPhotos,uploadedFile)
+    updateSolution.before_attachments = JSON.stringify(uploadedFile ? [...existingPhotos, uploadedFile] : existingPhotos); 
+    }
+    if (req.body.flutter_after_attachment_upload){
+        const existingPhotos = req.body.after_attachments ? JSON.parse(req.body.after_attachments) : [];
+        const uploadedFile = req.file ? `/uploads/${req.file.filename}` : null;
+        updateSolution.after_attachments = JSON.stringify(uploadedFile ? [...existingPhotos, uploadedFile] : existingPhotos); 
+    }
    
         let results = await solutionModel.uploadAttachment(id, updateSolution);
         if(results){
@@ -175,6 +200,7 @@ module.exports = {
     createSolution,
     addSolution,
     getTicketSolutions,
+    getSolution,
     deleteSolution,
     updateSolution,
     uploadAttachment,

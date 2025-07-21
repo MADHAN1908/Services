@@ -269,23 +269,28 @@ const verifyOTP = async (req, res) => {
 };
 
 const userLogin = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        res.status(422).json({
-            errors: errors.array()
-        });
-        return;
-    }
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //     console.log(1);
+    //     res.status(422).json({
+    //         errors: errors.array()
+    //     });
+    //     return;
+    // }
 
     const newUser = {
         email: req.body.email,
         password: req.body.password
     }
+    console.log(2);
+    console.log(req.body);
     const usersTable = `public.users`;
     let userData = await db.select(usersTable, '*', [`email ='${newUser.email}'`]);
     if (userData) {
+        console.log(userData);
         bcrypt.compare(req.body.password, userData.password, function (err, result) {
             if (result) {
+                console.log(3);
                 const userRecord = {
                     id: userData.userid,
                     name: userData.username,

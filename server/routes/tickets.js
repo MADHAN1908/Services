@@ -13,7 +13,7 @@ router.get("/close",auth.verifyToken, ticketController.getCloseTickets);
 router.put("/report",auth.verifyToken, ticketController.getTicketsReport);
 router.put("/update/:id",auth.verifyToken, ticketController.updateTicket);
 // router.put("/edit/:id" ,ticketController.updateTicket);
-router.delete("/delete/:id", ticketController.deleteTicket);
+router.delete("/delete/:id",auth.verifyToken, ticketController.deleteTicket);
 router.get("/:id",auth.verifyToken, ticketController.getTicket);
 
 

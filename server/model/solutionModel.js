@@ -25,6 +25,12 @@ const getTicketSolutions = async (id) => {
  return results;
 }
 
+const getSolution = async (id) => {
+    const query = `SELECT * FROM service.solution WHERE  solution_id = ${id}`;
+ const result = await db.raw(query);
+ return result[0];
+}
+
 
 const deleteSolution = async (id) => {
     const solutionTable = `service.solution`;
@@ -49,6 +55,7 @@ module.exports = {
     createSolution,
     addSolution,
     getTicketSolutions,
+    getSolution,
     deleteSolution,
     updateSolution,
     uploadAttachment

@@ -10,7 +10,7 @@ router.post("/create",auth.verifyToken,validator.validate('create-subadmin'), su
 router.get("/All", auth.verifyToken, subAdminController.getAllSubAdmin);
 router.get("/mail-service",auth.verifyToken, subAdminController.getMailService);
 
-router.get("/customers", subAdminController.getAllCustomer);
+router.get("/customers",auth.verifyToken, subAdminController.getAllCustomer);
 router.route("/contacts/:id").get(subAdminController.getCustomerContact);
 
 router.get('/assign', auth.verifyToken,subAdminController.getAssignUsers);

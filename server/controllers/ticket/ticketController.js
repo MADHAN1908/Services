@@ -4,7 +4,7 @@ const reportController = require('./reportController')
 
 const createTicket = async (req, res) => {
  const user = req.user;
-//  console.log(req.body);
+ console.log(req.body);
     const newTicket = {
         sr_desc: req.body.sr_desc,
         sr_date: req.body.reported_date,
@@ -154,6 +154,7 @@ const updateTicket = async (req, res) => {
     const id = parseInt(req.params.id);
     const user = req.user;
     var UpdateArray = {};
+    console.log(req.body);
     if (req.body.assign){
         UpdateArray.assigned_to = req.body.assign;
         UpdateArray.assigned_by = user.id;

@@ -47,6 +47,7 @@ app.use('/api/v1/expenses', require('./routes/expense'));
 app.use('/api/v1/categories', require('./routes/category'));
 app.use('/api/v1/company', require('./routes/company'));
 app.use('/api/v1/report', require('./routes/report'));
+app.use('/api/v1/dashboard', require('./routes/dashboard'));
 
 app.all('*', (req, res) => {
   res.status(404);

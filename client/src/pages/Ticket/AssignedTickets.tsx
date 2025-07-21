@@ -262,7 +262,7 @@ const AssignedTicket = () => {
                                 render: ({ sr_date,plan_in_time,sr_id,sr_status }) => (
                                     
                                     <Flatpickr
-                                    disabled={(['A','Y','Z'].includes(sr_status))}
+                                    disabled={(['A','Y','Z'].includes(sr_status)) || role != "Employee"}
                 defaultValue={plan_in_time}
                 options={{
                     enableTime: true,

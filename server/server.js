@@ -48,6 +48,7 @@ app.use('/api/v1/categories', require('./routes/category'));
 app.use('/api/v1/company', require('./routes/company'));
 app.use('/api/v1/report', require('./routes/report'));
 app.use('/api/v1/dashboard', require('./routes/dashboard'));
+app.use('/api/v1/checkins', require('./routes/checkIn'));
 
 app.all('*', (req, res) => {
   res.status(404);

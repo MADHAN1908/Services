@@ -43,6 +43,18 @@ const getExpenses = async (id) => {
     return results;
 }
 
+const getExpense = async (id) => {
+    const query = `SELECT *  from service.expenses  Where expense_id = ${id}`;
+    const result = await db.raw(query);
+    return result;
+}
+
+const updateExpense = async (id,data) => {
+    const expenseTable = `service.expenses`;
+    const result = await db.update(expenseTable, data, [`expense_id = '${id}'`]);
+    return result[0];
+}
+
 
 const deleteExpense = async (id) => {
     const expenseTable = `service.expenses`;
@@ -57,6 +69,8 @@ const deleteExpense = async (id) => {
 module.exports = {
     createExpense,
     getExpenses,
+    getExpense,
     getAllExpenses,
+    updateExpense,
     deleteExpense  
 }

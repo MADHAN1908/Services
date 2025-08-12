@@ -35,6 +35,7 @@ const AddCategory = lazy(()=> import('../pages/Category/Add'))
 const EditCategory = lazy(()=> import('../pages/Category/Edit'))
 
 const Index = lazy(() => import('../pages/Index'));
+const LandingPage = lazy(() => import('../pages/LandingPage'));
 const ERROR404 = lazy(() => import('../pages/Pages/Error404'));
 const ERROR500 = lazy(() => import('../pages/Pages/Error500'));
 const ERROR503 = lazy(() => import('../pages/Pages/Error503'));
@@ -69,7 +70,12 @@ const routes = [
     {
         path: '/',
         element: <Index />,
-    },  
+    }, 
+    {
+        path: '/landing',
+        element: <LandingPage />,
+        layout:'plain',
+    }, 
     // User
     {
         path: '/users',

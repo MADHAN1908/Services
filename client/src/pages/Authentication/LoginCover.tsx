@@ -64,7 +64,7 @@ const LoginCover = () => {
                 // document.cookie = `name=${response.data.name};  path=/; max-age=18000;`;
                 sessionStorage.setItem('user',JSON.stringify({ name: response.data.name, role: response.data.role, token:response.AccessToken }));
                 setState((prevState) => ({ ...prevState, loading: true, token: response.AccessToken }));
-                navigate('/');
+                navigate('/landing');
             } else {
                 const toast = Swal.mixin({
                     toast: true,
